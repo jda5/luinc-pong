@@ -1,22 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"internal/utils"
+	"github.com/gin-gonic/gin"
+	"github.com/jda5/table-tennis/internal/handlers"
 )
 
 func main() {
-	playerRating := 1000
-	opponentRating := 1000
-	score := 1
-	k := 40
-	newPlayerRating := utils.CalculateNewRating(
-		playerRating, opponentRating, score, k,
-	)
-	fmt.Println(newPlayerRating)
-
-	newOpponentRating := utils.CalculateNewRating(
-		opponentRating, playerRating, 1.0-score, k,
-	)
-	fmt.Println(newOpponentRating)
+	router := gin.Default()
+	router.GET("/leaderboard", handlers.GetLeaderboard)
+	router.Run("localhost:8080")
 }
