@@ -1,7 +1,9 @@
 package stores
 
-import "database/sql"
+import "github.com/jda5/table-tennis/internal/models"
 
-type Connection struct {
-	DB *sql.DB
+type Store interface {
+	GetLeaderboard() ([]models.LeaderboardRow, error)
+	InsertPlayer(name string) (int64, error)
+	InsertGameResult(r models.GameResult) (int64, error)
 }
