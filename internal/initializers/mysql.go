@@ -4,13 +4,13 @@ import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jda5/table-tennis/internal/stores/base"
+	"github.com/jda5/table-tennis/internal/stores"
 )
 
-func CreateMySQLStore() *base.Driver {
+func CreateMySQLStore() *stores.Connection {
 	db, err := sql.Open("mysql", "user:password@/dbname")
 	if err != nil {
 		panic(err)
 	}
-	return &base.Driver{db}
+	return &stores.Connection{DB: db}
 }

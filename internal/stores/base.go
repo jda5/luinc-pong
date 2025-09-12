@@ -2,6 +2,6 @@ package stores
 
 import "database/sql"
 
-type Driver struct {
+type Connection struct {
 	DB *sql.DB
 }
