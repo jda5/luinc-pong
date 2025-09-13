@@ -29,13 +29,13 @@ func (h *APIHandler) GetPlayerProfile(c *gin.Context) {
 	idString := c.Param("id")
 	id, err := strconv.Atoi(idString)
 	if err != nil {
-		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"message": fmt.Sprintf("'%s' is not a valid interger", idString)})
 		return
 	}
 
 	profile, err := h.Store.GetPlayerProfile(id)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "player not found"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, profile)

@@ -184,6 +184,12 @@ func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
 	if err := rows.Err(); err != nil {
 		return profile, fmt.Errorf("error fetching profile: %v", err)
 	}
+
+	if len(profile.RecentGames) == 0 {
+		// to return an empty array instead of null for JSON
+		profile.RecentGames = make([]models.Game, 0)
+	}
+
 	return profile, nil
 }
 
