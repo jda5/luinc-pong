@@ -1,8 +1,6 @@
 package models
 
-import (
-	"time"
-)
+import "time"
 
 type LeaderboardRow struct {
 	ID        int     `json:"id"`

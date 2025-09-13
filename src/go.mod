@@ -1,4 +1,4 @@
-module github.com/jda5/table-tennis
+module github.com/jda5/table-tennis/src
 
 go 1.25.0
 

@@ -7,9 +7,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jda5/table-tennis/internal/models"
-	"github.com/jda5/table-tennis/internal/stores"
-	"github.com/jda5/table-tennis/internal/utils"
+	"github.com/jda5/table-tennis/src/internal/models"
+	"github.com/jda5/table-tennis/src/internal/stores"
+	"github.com/jda5/table-tennis/src/internal/utils"
 )
 
 type APIHandler struct {

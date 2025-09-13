@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/jda5/table-tennis/internal/models"
+	"github.com/jda5/table-tennis/src/internal/models"
 )
 
 // ---------------------------------------- queries
