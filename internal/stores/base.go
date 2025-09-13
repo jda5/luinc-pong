@@ -8,6 +8,7 @@ type EloRatings map[int]float64
 type Store interface {
 	GetLeaderboard() ([]models.LeaderboardRow, error)
 	GetPlayerEloRatings(ids [2]int) (EloRatings, error)
+	GetPlayerProfile(id int) (models.PlayerProfile, error)
 	InsertGameResult(r models.GameResult) (int64, error)
 	InsertPlayer(name string) (int64, error)
 	UpdateEloRatings(players EloRatings) error

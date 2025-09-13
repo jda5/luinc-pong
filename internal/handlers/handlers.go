@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jda5/table-tennis/internal/models"
@@ -22,6 +23,22 @@ func (h *APIHandler) GetLeaderboard(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusOK, leaderboard)
+}
+
+func (h *APIHandler) GetPlayerProfile(c *gin.Context) {
+	idString := c.Param("id")
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
+		return
+	}
+
+	profile, err := h.Store.GetPlayerProfile(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, profile)
 }
 
 func (h *APIHandler) InsertPlayer(c *gin.Context) {

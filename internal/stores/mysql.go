@@ -21,6 +21,51 @@ INSERT INTO players (name)
 VALUES (?);
 `
 
+var SELECT_PLAYER_PROFILE_QUERY string = `
+SELECT 
+    (SELECT 
+            COUNT(*)
+        FROM
+            games
+        WHERE
+            winner_id = players.id) AS total_wins,
+    (SELECT 
+            COUNT(*)
+        FROM
+            games
+        WHERE
+            loser_id = players.id) AS total_lost,
+    name,
+    elo_rating,
+    created_at
+FROM
+    players
+WHERE
+    id = ?;
+`
+
+var SELECT_PLAYER_GAMES string = `
+SELECT
+	g.id AS game_id,
+    w.id AS winner_id,
+    w.name AS winner_name,
+    l.id AS loser_id,
+    l.name AS loser_name,
+    g.winner_score,
+    g.loser_score,
+    g.created_at
+FROM
+    games g
+        LEFT JOIN
+    players w ON g.winner_id = w.id
+        LEFT JOIN
+    players l ON g.loser_id = l.id
+WHERE
+    g.winner_id = ? OR g.loser_id = ?
+ORDER BY g.created_at DESC
+LIMIT 20;
+`
+
 var SELECT_LEADERBOARD_QUERY string = `
 SELECT 
     id, name, elo_rating
@@ -106,6 +151,42 @@ func (s *MySQLStore) GetPlayerEloRatings(ids [2]int) (EloRatings, error) {
 	return ratings, nil
 }
 
+func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
+	var profile models.PlayerProfile
+	var totalWins int
+	var totalLost int
+
+	row := s.DB.QueryRow(SELECT_PLAYER_PROFILE_QUERY, id)
+	if err := row.Scan(&totalWins, &totalLost, &profile.Name, &profile.EloRating, &profile.CreatedAt); err != nil {
+		return profile, fmt.Errorf("error fetching profile: %v", err)
+	}
+	profile.ID = id
+	profile.GamesWon = totalWins
+	profile.GamesPlayed = totalWins + totalLost
+
+	rows, err := s.DB.Query(SELECT_PLAYER_GAMES, id, id)
+	if err != nil {
+		return profile, fmt.Errorf("error fetching profile: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var game models.Game
+		var winner models.Player
+		var loser models.Player
+		if err := rows.Scan(&game.ID, &winner.ID, &winner.Name, &loser.ID, &loser.Name, &game.WinnerScore, &game.LoserScore, &game.CreatedAt); err != nil {
+			return profile, fmt.Errorf("error fetching profile: %v", err)
+		}
+		game.Winner = winner
+		game.Loser = loser
+		profile.RecentGames = append(profile.RecentGames, game)
+	}
+	if err := rows.Err(); err != nil {
+		return profile, fmt.Errorf("error fetching profile: %v", err)
+	}
+	return profile, nil
+}
+
 func (s *MySQLStore) InsertGameResult(r models.GameResult) (int64, error) {
 	result, err := s.DB.Exec(INSERT_GAME_QUERY, r.WinnerID, r.LoserID, r.WinnerScore, r.LoserScore)
 	if err != nil {
@@ -168,6 +249,7 @@ func CreateMySQLDAO() *MySQLStore {
 	cfg.Passwd = os.Getenv("MYSQL_PASSWORD")
 	cfg.Addr = os.Getenv("MYSQL_HOST")
 	cfg.DBName = os.Getenv("MYSQL_DATABASE")
+	cfg.ParseTime = true
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {

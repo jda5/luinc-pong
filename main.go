@@ -9,10 +9,12 @@ import (
 
 func main() {
 	router := gin.Default()
-
 	h := handlers.APIHandler{Store: stores.CreateMySQLDAO()}
+
 	router.GET("/leaderboards", h.GetLeaderboard)
+	router.GET("/players/:id", h.GetPlayerProfile)
 	router.POST("/players", h.InsertPlayer)
 	router.POST("/games", h.InsertGame)
+
 	router.Run("localhost:8080")
 }
