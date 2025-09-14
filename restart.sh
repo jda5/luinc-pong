@@ -1,7 +1,8 @@
 # ------------------------------------------ stop services
 docker compose down
 
-docker rmi table-tennis-app --force
+docker rmi luinc-pong-backend --force
+docker rmi luinc-pong-frontend --force
 
 # ------------------------------------------ create networks
 docker network create traefik-public
