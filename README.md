@@ -1,3 +1,3 @@
-# Table Tennis Leaderboard
+# Table Tennis Leaderboard 🏓
 
 A leaderboard for our office table tennis games
