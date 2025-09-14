@@ -9,13 +9,13 @@ WORKDIR /app
 # Only copy the dependency files first.
 # Docker caches layers. As long as these two files don't change,
 # Docker will re-use the cached layer from the next step, saving time.
-COPY ./src/go.mod ./src/go.sum ./
+COPY ./backend/src/go.mod ./backend/src/go.sum ./
 
 # Download all dependencies into the container.
 RUN go mod download
 
 # Copy the rest of our source code.
-COPY ./src .
+COPY ./backend/src .
 
 # 'CGO_ENABLED=0' tells Go to build a "static binary," meaning
 # it has ZERO external system dependencies. It's totally self-contained.

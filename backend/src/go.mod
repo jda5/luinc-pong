@@ -1,4 +1,4 @@
-module github.com/jda5/table-tennis/src
+module github.com/jda5/luinc-pong/src
 
 go 1.25.0
 

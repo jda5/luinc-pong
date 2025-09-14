@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jda5/table-tennis/src/internal/handlers"
-	"github.com/jda5/table-tennis/src/internal/stores"
+	"github.com/jda5/luinc-pong/src/internal/handlers"
+	"github.com/jda5/luinc-pong/src/internal/stores"
 
 	"github.com/gin-contrib/cors"
 	_ "github.com/joho/godotenv/autoload"

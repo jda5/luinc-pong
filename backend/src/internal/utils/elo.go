@@ -3,7 +3,7 @@ package utils
 import (
 	"math"
 
-	"github.com/jda5/table-tennis/src/internal/stores"
+	"github.com/jda5/luinc-pong/src/internal/stores"
 )
 
 // CalculateExpectedScore determines the probability of a player winning against an opponent

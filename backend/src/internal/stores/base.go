@@ -1,6 +1,6 @@
 package stores
 
-import "github.com/jda5/table-tennis/src/internal/models"
+import "github.com/jda5/luinc-pong/src/internal/models"
 
 // map from player ID to their Elo Rating
 type EloRatings map[int]float64
