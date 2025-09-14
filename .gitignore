@@ -8,7 +8,7 @@ go.work
 go.work.sum
 
 # Node.js dependencies
-/node_modules
+frontend/src/node_modules
 
 # Compiled JavaScript/TypeScript output
 /build
