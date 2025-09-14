@@ -7,6 +7,11 @@ services:
 
     container_name: app
 
+    env_file:
+      # Tells Docker Compose to read the .env file in this directory and 
+      # inject its contents as environment variables into the container
+      - ./src/.env
+
     ports:
       - "8080:8080"
 
