@@ -13,11 +13,6 @@ services:
     restart: always
 
     labels:
-      # === Dashboard Configurations ===
-
-      # Enable Traefik for this service, to make it available in the public network
-      - traefik.enable=true
-
       # === Redirect HTTP to HTTPS ===
 
       # https-redirect middleware to rediret HTTP to HTTPS

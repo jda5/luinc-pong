@@ -1,18 +1,16 @@
 
-# -------------------------------------------------------------------------------- services
 services:
 
-  # ---------------------------------------- App
   app:
     build:
       dockerfile: ./Dockerfile
 
-    container_name: table-tennis
+    container_name: app
 
     ports:
       - "8080:8080"
 
-    restart: always
+    restart: no
 
     labels:
       # === Traefik Configurations / TLS ===
@@ -70,7 +68,6 @@ services:
       # machine on Linux based systems.
       - "host.docker.internal:host-gateway"
 
-# -------------------------------------------------------------------------------- networks
 networks:
   traefik-public:
     external: true

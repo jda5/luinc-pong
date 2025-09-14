@@ -16,5 +16,5 @@ func main() {
 	router.POST("/players", h.InsertPlayer)
 	router.POST("/games", h.InsertGame)
 
-	router.Run("localhost:8080")
+	router.Run(":8080")
 }

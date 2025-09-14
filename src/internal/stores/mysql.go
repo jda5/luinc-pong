@@ -253,18 +253,21 @@ func CreateMySQLDAO() *MySQLStore {
 	cfg := mysql.NewConfig()
 	cfg.User = os.Getenv("MYSQL_USER")
 	cfg.Passwd = os.Getenv("MYSQL_PASSWORD")
-	cfg.Addr = os.Getenv("MYSQL_HOST")
-	cfg.DBName = os.Getenv("MYSQL_DATABASE")
+
+	cfg.Net = "tcp"
+	cfg.Addr = "host.docker.internal:3306"
+	cfg.DBName = "table_tennis"
+
 	cfg.ParseTime = true
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("unable to connect to mysq dsn '%v': %v", cfg.FormatDSN(), err))
 	}
 
 	err = db.Ping()
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("ping failed to mysq dsn '%v': %v", cfg.FormatDSN(), err))
 	}
 
 	return &MySQLStore{DB: db}
