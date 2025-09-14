@@ -10,12 +10,6 @@ go.work.sum
 # Node.js dependencies
 frontend/src/node_modules
 
-# Compiled JavaScript/TypeScript output
-/build
-/dist
-/.next
-/out
-
 # Go binaries for programs and plugins
 *.exe
 *.exe~

@@ -1,0 +1,41 @@
+export interface LeaderboardRow {
+  id: number;
+  name: string;
+  eloRating: number;
+}
+
+export interface Player {
+  id: number;
+  name: string;
+}
+
+export interface Game {
+  id: number;
+  winner: Player;
+  loser: Player;
+  winnerScore: number | null;
+  loserScore: number | null;
+  createdAt: string;
+}
+
+export interface PlayerProfile {
+  id: number;
+  name: string;
+  eloRating: number;
+  createdAt: string;
+  gamesPlayed: number;
+  gamesWon: number;
+  recentGames: Game[];
+}
+
+// Request body types
+export interface GameResult {
+  winnerId: number;
+  loserId: number;
+  winnerScore?: number;
+  loserScore?: number;
+}
+
+export interface PlayerCreate {
+  name: string;
+}
