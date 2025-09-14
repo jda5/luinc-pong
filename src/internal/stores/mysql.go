@@ -11,17 +11,17 @@ import (
 
 // ---------------------------------------- queries
 
-var INSERT_GAME_QUERY string = `
+const INSERT_GAME_QUERY string = `
 INSERT INTO games (winner_id, loser_id, winner_score, loser_score)
 VALUES (?, ?, ?, ?);
 `
 
-var INSERT_PLAYER_QUERY string = `
+const INSERT_PLAYER_QUERY string = `
 INSERT INTO players (name)
 VALUES (?);
 `
 
-var SELECT_PLAYER_PROFILE_QUERY string = `
+const SELECT_PLAYER_PROFILE_QUERY string = `
 SELECT 
     (SELECT 
             COUNT(*)
@@ -44,7 +44,7 @@ WHERE
     id = ?;
 `
 
-var SELECT_PLAYER_GAMES string = `
+const SELECT_PLAYER_GAMES string = `
 SELECT
 	g.id AS game_id,
     w.id AS winner_id,
@@ -66,7 +66,7 @@ ORDER BY g.created_at DESC
 LIMIT 20;
 `
 
-var SELECT_LEADERBOARD_QUERY string = `
+const SELECT_LEADERBOARD_QUERY string = `
 SELECT 
     id, name, elo_rating
 FROM
@@ -74,7 +74,7 @@ FROM
 ORDER BY elo_rating DESC;
 `
 
-var SELECT_PLAYER_ELO_RATINGS string = `
+const SELECT_PLAYER_ELO_RATINGS string = `
 SELECT
 	id, elo_rating
 FROM
@@ -83,7 +83,7 @@ WHERE
 	id IN (?, ?);
 `
 
-var UPDATE_ELO_RATING_QUERY string = `
+const UPDATE_ELO_RATING_QUERY string = `
 UPDATE players 
 SET 
     elo_rating = ?
