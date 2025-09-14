@@ -8,7 +8,7 @@ docker rmi luinc-pong-frontend --force
 docker network create traefik-public
 
 # ------------------------------------------ start services
-# docker compose -f docker-compose.traefik.yml up -d
-# docker compose -f docker-compose.yml up -d
+docker compose -f docker-compose.traefik.yml up -d
+docker compose -f docker-compose.yml up -d
 
-docker compose up
+# docker compose up
