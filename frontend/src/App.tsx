@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-r
 import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from './api';
 import type { GameResult, PlayerCreate } from './types';
+import AuthWrapper from './components/AuthWrapper';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -597,18 +598,20 @@ const PlayerPage: React.FC = () => {
 // Main App Component
 const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="min-h-screen">
-          <main>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/player/:id" element={<PlayerPage />} />
-            </Routes>
-          </main>
-        </div>
-    </Router>
-    </QueryClientProvider>
+    <AuthWrapper>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <div className="min-h-screen">
+            <main>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/player/:id" element={<PlayerPage />} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+        </QueryClientProvider>
+    </AuthWrapper>
   );
 };
 
