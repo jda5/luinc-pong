@@ -16,7 +16,7 @@ func main() {
 	router.Use(
 		cors.New(
 			cors.Config{
-				AllowOrigins:     []string{"http://localhost:3000", "https://luincpong.com"},
+				AllowOrigins:     []string{"http://localhost:5173", "https://luincpong.com"},
 				AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 				AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 				AllowCredentials: true,
@@ -26,7 +26,7 @@ func main() {
 	)
 	h := handlers.APIHandler{Store: stores.CreateMySQLDAO()}
 
-	router.GET("/leaderboards", h.GetLeaderboard)
+	router.GET("/leaderboard", h.GetLeaderboard)
 	router.GET("/players/:id", h.GetPlayerProfile)
 	router.GET("/players", h.GetPlayerProfile)
 	router.POST("/players", h.InsertPlayer)

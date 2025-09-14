@@ -68,6 +68,11 @@ func (h *APIHandler) InsertGame(c *gin.Context) {
 		return
 	}
 
+	if result.WinnerID == result.LoserID {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "winnerId and loserId cannot be the same"})
+		return
+	}
+
 	id, err := h.Store.InsertGameResult(result)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
