@@ -28,7 +28,6 @@ func main() {
 
 	router.GET("/leaderboard", h.GetLeaderboard)
 	router.GET("/players/:id", h.GetPlayerProfile)
-	router.GET("/players", h.GetPlayerProfile)
 	router.POST("/players", h.InsertPlayer)
 	router.POST("/games", h.InsertGame)
 
