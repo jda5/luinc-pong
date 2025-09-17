@@ -116,6 +116,11 @@ func (s *MySQLStore) GetLeaderboard() ([]models.LeaderboardRow, error) {
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error fetching leaderboard: %v", err)
 	}
+
+	if len(leaderboard) != 0 {
+		leaderboard = make([]models.LeaderboardRow, 0)
+	}
+
 	return leaderboard, nil
 }
 
