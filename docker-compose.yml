@@ -2,8 +2,8 @@
 services:
 
   backend:
-    build:
-      dockerfile: ./backend/Dockerfile
+    # build:
+    #   dockerfile: ./backend/Dockerfile
 
     platform: linux/amd64
 
@@ -26,57 +26,57 @@ services:
 
     restart: always
 
-#   frontend:
-#     build:
-#       dockerfile: ./frontend/Dockerfile
+  frontend:
+    build:
+      dockerfile: ./frontend/Dockerfile
     
-#     container_name: frontend
+    container_name: frontend
 
-#     ports:
-#       - "5173:5173"
+    ports:
+      - "5173:5173"
 
-#     labels:
-#       # === Traefik Configurations / TLS ===
+    labels:
+      # === Traefik Configurations / TLS ===
 
-#       # Enable Traefik for this specific "backend" service
-#       - traefik.enable=true
-#       # Define the port inside of the Docker service to use
-#       - traefik.http.services.app.loadbalancer.server.port=5173
-#       # Make Traefik use this domain in HTTP
-#       - traefik.http.routers.app-http.entrypoints=http
-#       - traefik.http.routers.app-http.rule=Host(`${DOMAIN}`)
-#       # Use the traefik-public network (declared below)
-#       - traefik.docker.network=traefik-public
-#       # Make Traefik use this domain in HTTPS
-#       - traefik.http.routers.app-https.entrypoints=https
-#       - traefik.http.routers.app-https.rule=Host(`${DOMAIN}`)
-#       - traefik.http.routers.app-https.tls=true
-#       # Use the "le" (Let's Encrypt) resolver
-#       - traefik.http.routers.app-https.tls.certresolver=le
-#       # https-redirect middleware to redirect HTTP to HTTPS
-#       - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
-#       - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
-#       # Middleware to redirect HTTP to HTTPS
-#       - traefik.http.routers.app-http.middlewares=https-redirect
+      # Enable Traefik for this specific "backend" service
+      - traefik.enable=true
+      # Define the port inside of the Docker service to use
+      - traefik.http.services.app.loadbalancer.server.port=5173
+      # Make Traefik use this domain in HTTP
+      - traefik.http.routers.app-http.entrypoints=http
+      - traefik.http.routers.app-http.rule=Host(`${DOMAIN}`)
+      # Use the traefik-public network (declared below)
+      - traefik.docker.network=traefik-public
+      # Make Traefik use this domain in HTTPS
+      - traefik.http.routers.app-https.entrypoints=https
+      - traefik.http.routers.app-https.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.app-https.tls=true
+      # Use the "le" (Let's Encrypt) resolver
+      - traefik.http.routers.app-https.tls.certresolver=le
+      # https-redirect middleware to redirect HTTP to HTTPS
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      # Middleware to redirect HTTP to HTTPS
+      - traefik.http.routers.app-http.middlewares=https-redirect
 
-#       # === DoS / DDoS mitigations ===
+      # === DoS / DDoS mitigations ===
 
-#       # Limit the number of request that has been started but not yet completed, a.k.a. a request in progress.
-#       - traefik.http.middlewares.test-inflightreq.inflightreq.amount=10
-#       # Limit the maximum number of requests per second from a given source
-#       - traefik.http.middlewares.test-ratelimit.ratelimit.average=20
-#       # the maximum number of requests allowed to go through in the same arbitrarily small period of time.
-#       - traefik.http.middlewares.test-ratelimit.ratelimit.burst=1
+      # Limit the number of request that has been started but not yet completed, a.k.a. a request in progress.
+      - traefik.http.middlewares.test-inflightreq.inflightreq.amount=10
+      # Limit the maximum number of requests per second from a given source
+      - traefik.http.middlewares.test-ratelimit.ratelimit.average=20
+      # the maximum number of requests allowed to go through in the same arbitrarily small period of time.
+      - traefik.http.middlewares.test-ratelimit.ratelimit.burst=1
 
-#       - traefik.http.routers.upload-https.middlewares=rate-limit-upload
-#       # Stricter rate limits for file uploads
-#       - traefik.http.middlewares.rate-limit-upload.ratelimit.average=5
+      - traefik.http.routers.upload-https.middlewares=rate-limit-upload
+      # Stricter rate limits for file uploads
+      - traefik.http.middlewares.rate-limit-upload.ratelimit.average=5
 
-#     networks:
-#       # Use the public network created to be shared between Traefik and
-#       # any other service that needs to be publically available with HTTPS
-#       - traefik-public
+    networks:
+      # Use the public network created to be shared between Traefik and
+      # any other service that needs to be publically available with HTTPS
+      - traefik-public
 
-# networks:
-#   traefik-public:
-#     external: true
+networks:
+  traefik-public:
+    external: true
