@@ -98,7 +98,7 @@ type MySQLStore struct {
 }
 
 func (s *MySQLStore) GetLeaderboard() ([]models.LeaderboardRow, error) {
-	var leaderboard []models.LeaderboardRow
+	leaderboard := make([]models.LeaderboardRow, 0)
 
 	rows, err := s.DB.Query(SELECT_LEADERBOARD_QUERY)
 	if err != nil {
@@ -115,10 +115,6 @@ func (s *MySQLStore) GetLeaderboard() ([]models.LeaderboardRow, error) {
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error fetching leaderboard: %v", err)
-	}
-
-	if len(leaderboard) != 0 {
-		leaderboard = make([]models.LeaderboardRow, 0)
 	}
 
 	return leaderboard, nil

@@ -20,7 +20,7 @@ COPY ./backend/src .
 # 'CGO_ENABLED=0' tells Go to build a "static binary," meaning
 # it has ZERO external system dependencies. It's totally self-contained.
 # '-o main' names the output file "main".
-RUN CGO_ENABLED=0 GOMAXPROCS=1 go build -o main .
+RUN CGO_ENABLED=0 go build -o main .
 
 # ------------------------------------------------------------ run stage
 # start fresh from a minimal OS image. Alpine is only ~5MB.
