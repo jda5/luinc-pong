@@ -26,6 +26,9 @@ services:
 
     restart: always
 
+    networks:
+      - internal-network
+
   frontend:
     build:
       dockerfile: ./frontend/Dockerfile
@@ -76,7 +79,11 @@ services:
       # Use the public network created to be shared between Traefik and
       # any other service that needs to be publically available with HTTPS
       - traefik-public
+      - internal-network
 
 networks:
   traefik-public:
+    external: true
+
+  internal-network:
     external: true

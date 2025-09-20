@@ -1,6 +1,6 @@
 import { LeaderboardRow, PlayerProfile, GameResult, PlayerCreate } from '../types';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://backend:8080';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {

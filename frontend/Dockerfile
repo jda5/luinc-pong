@@ -26,6 +26,8 @@ RUN npm install --omit=dev
 # Copy built files from builder
 COPY --from=builder /app/src/dist ./dist
 
+COPY frontend/src/vite.config.ts .
+
 EXPOSE 5173
 
 CMD ["npx", "vite", "preview", "--port", "5173", "--host", "0.0.0.0"]

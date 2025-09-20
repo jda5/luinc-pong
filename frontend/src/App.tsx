@@ -330,7 +330,7 @@ const HomePage: React.FC = () => {
           </h2>
           <p className="athletic-body text-grey-300 mb-4">
             {isNetworkError 
-              ? 'Cannot connect to the backend server at http://localhost:8080' 
+              ? 'Cannot connect to the backend server at http://backend:8080' 
               : 'There was an error loading the leaderboard'}
           </p>
           <p className="athletic-label mb-6 text-red-600">
