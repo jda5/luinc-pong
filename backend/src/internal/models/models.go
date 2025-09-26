@@ -8,6 +8,14 @@ type LeaderboardRow struct {
 	EloRating float64 `json:"eloRating"`
 }
 
+// ---------------------------------------- achievements
+
+type Achievement struct {
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
 // ---------------------------------------- players
 
 type PlayerID struct {
@@ -24,13 +32,14 @@ type Player struct {
 }
 
 type PlayerProfile struct {
-	ID          int       `json:"id"`
-	Name        string    `json:"name"`
-	EloRating   float64   `json:"eloRating"`
-	CreatedAt   time.Time `json:"createdAt"`
-	GamesPlayed int       `json:"gamesPlayed"`
-	GamesWon    int       `json:"gamesWon"`
-	RecentGames []Game    `json:"recentGames"`
+	ID           int           `json:"id"`
+	Name         string        `json:"name"`
+	EloRating    float64       `json:"eloRating"`
+	CreatedAt    time.Time     `json:"createdAt"`
+	GamesPlayed  int           `json:"gamesPlayed"`
+	GamesWon     int           `json:"gamesWon"`
+	RecentGames  []Game        `json:"recentGames"`
+	Achievements []Achievement `json:"achievements"`
 }
 
 // ---------------------------------------- games

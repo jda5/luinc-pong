@@ -21,6 +21,17 @@ INSERT INTO players (name)
 VALUES (?);
 `
 
+const SELECT_PLAYER_ACHIEVEMENTS_QUERY string = `
+SELECT 
+   a.id, a.title, a.description
+FROM
+    achievement a
+		JOIN
+	player_achievement pa ON pa.achievement_id = a.id
+WHERE
+    pa.player_id = ?;
+`
+
 const SELECT_PLAYER_PROFILE_QUERY string = `
 SELECT 
     (SELECT 
@@ -152,10 +163,16 @@ func (s *MySQLStore) GetPlayerEloRatings(ids [2]int) (EloRatings, error) {
 	return ratings, nil
 }
 
+func (s *MySQLStore) GetPlayerGames(id int) ([]models.Game, error) {
+
+}
+
 func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
 	var profile models.PlayerProfile
 	var totalWins int
 	var totalLost int
+
+	// ---------------------------------------- basic profile info
 
 	row := s.DB.QueryRow(SELECT_PLAYER_PROFILE_QUERY, id)
 	if err := row.Scan(&totalWins, &totalLost, &profile.Name, &profile.EloRating, &profile.CreatedAt); err != nil {
@@ -165,30 +182,55 @@ func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
 	profile.GamesWon = totalWins
 	profile.GamesPlayed = totalWins + totalLost
 
-	rows, err := s.DB.Query(SELECT_PLAYER_GAMES, id, id)
-	if err != nil {
-		return profile, fmt.Errorf("error fetching profile: %v", err)
-	}
-	defer rows.Close()
+	// ---------------------------------------- recent games
 
-	for rows.Next() {
+	gameRows, err := s.DB.Query(SELECT_PLAYER_GAMES, id, id)
+	if err != nil {
+		return profile, fmt.Errorf("error fetching profile (recent games): %v", err)
+	}
+	defer gameRows.Close()
+
+	for gameRows.Next() {
 		var game models.Game
 		var winner models.Player
 		var loser models.Player
-		if err := rows.Scan(&game.ID, &winner.ID, &winner.Name, &loser.ID, &loser.Name, &game.WinnerScore, &game.LoserScore, &game.CreatedAt); err != nil {
-			return profile, fmt.Errorf("error fetching profile: %v", err)
+		if err := gameRows.Scan(&game.ID, &winner.ID, &winner.Name, &loser.ID, &loser.Name, &game.WinnerScore, &game.LoserScore, &game.CreatedAt); err != nil {
+			return profile, fmt.Errorf("error fetching profile (recent games): %v", err)
 		}
 		game.Winner = winner
 		game.Loser = loser
 		profile.RecentGames = append(profile.RecentGames, game)
 	}
-	if err := rows.Err(); err != nil {
-		return profile, fmt.Errorf("error fetching profile: %v", err)
+	if err := gameRows.Err(); err != nil {
+		return profile, fmt.Errorf("error fetching profile (recent games): %v", err)
 	}
 
 	if len(profile.RecentGames) == 0 {
 		// to return an empty array instead of null for JSON
 		profile.RecentGames = make([]models.Game, 0)
+	}
+
+	// ---------------------------------------- achievements
+
+	achievementRows, err := s.DB.Query(SELECT_PLAYER_ACHIEVEMENTS_QUERY, id)
+	if err != nil {
+		return profile, fmt.Errorf("error fetching profile (achievements): %v", err)
+	}
+	defer achievementRows.Close()
+
+	for achievementRows.Next() {
+		var achievement models.Achievement
+		if err := achievementRows.Scan(&achievement.ID, &achievement.Title, &achievement.Description); err != nil {
+			return profile, fmt.Errorf("error fetching profile (achievements): %v", err)
+		}
+		profile.Achievements = append(profile.Achievements, achievement)
+	}
+	if err := achievementRows.Err(); err != nil {
+		return profile, fmt.Errorf("error fetching profile (achievements): %v", err)
+	}
+
+	if len(profile.Achievements) == 0 {
+		profile.Achievements = make([]models.Achievement, 0)
 	}
 
 	return profile, nil
