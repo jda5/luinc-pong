@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jda5/luinc-pong/src/internal/models"
@@ -114,6 +115,7 @@ WHERE
 
 type MySQLStore struct {
 	DB *sql.DB
+	TZ *time.Location
 }
 
 func (s *MySQLStore) GetAchievements() ([]models.Achievement, error) {
@@ -211,6 +213,7 @@ func (s *MySQLStore) GetPlayerGames(id int, limit int) ([]models.Game, error) {
 		}
 		game.Winner = winner
 		game.Loser = loser
+		game.CreatedAt = game.CreatedAt.In(s.TZ)
 	}
 	if err := rows.Err(); err != nil {
 		return games, fmt.Errorf("error fetching games: %v", err)
@@ -224,7 +227,6 @@ func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
 	var totalLost int
 
 	// ---------------------------------------- basic profile info
-
 	row := s.DB.QueryRow(SELECT_PLAYER_PROFILE_QUERY, id)
 	if err := row.Scan(&totalWins, &totalLost, &profile.Name, &profile.EloRating, &profile.CreatedAt); err != nil {
 		return profile, fmt.Errorf("error fetching profile: %v", err)
@@ -232,6 +234,7 @@ func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
 	profile.ID = id
 	profile.GamesWon = totalWins
 	profile.GamesPlayed = totalWins + totalLost
+	profile.CreatedAt = profile.CreatedAt.In(s.TZ)
 
 	// ---------------------------------------- recent games
 
@@ -374,5 +377,10 @@ func CreateMySQLDAO() *MySQLStore {
 		panic(fmt.Sprintf("ping failed to mysq dsn '%v': %v", cfg.FormatDSN(), err))
 	}
 
-	return &MySQLStore{DB: db}
+	tz, err := time.LoadLocation("Europe/London")
+	if err != nil {
+		panic(fmt.Sprintf("error fetching timezone: %v", err))
+	}
+
+	return &MySQLStore{DB: db, TZ: tz}
 }

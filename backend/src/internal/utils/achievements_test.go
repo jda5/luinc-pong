@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"slices"
 	"testing"
 	"time"
@@ -10,6 +11,14 @@ import (
 )
 
 // -------------------------------------------------------------------------------- Test Helpers
+
+func createTimeZone() *time.Location {
+	tz, err := time.LoadLocation("Europe/London")
+	if err != nil {
+		panic(fmt.Sprintf("error creating timezone: %v", err))
+	}
+	return tz
+}
 
 // a helper function that creates a pointer to an interger
 func intPointer(n int) *int {
@@ -54,6 +63,8 @@ var opponent models.Player = models.Player{
 	Name: "Test Opponent",
 }
 
+var TZ *time.Location = createTimeZone()
+
 // -------------------------------------------------------------------------------- Base Tests
 
 func TestCalculatePlayersAchievementsReturnsPlayOne(t *testing.T) {
@@ -64,7 +75,7 @@ func TestCalculatePlayersAchievementsReturnsPlayOne(t *testing.T) {
 			Loser:       opponent,
 			WinnerScore: intPointer(11),
 			LoserScore:  intPointer(5),
-			CreatedAt:   time.Date(2023, 1, 2, 10, 0, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2023, 1, 2, 10, 0, 0, 0, TZ),
 		},
 	}
 	lastGame := playerGames[len(playerGames)-1]
@@ -97,7 +108,7 @@ func TestWin15Consecutive(t *testing.T) {
 			Loser:       opponent,
 			WinnerScore: intPointer(11),
 			LoserScore:  intPointer(5),
-			CreatedAt:   time.Date(2023, 1, 1, 10+i, 0, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2023, 1, 1, 10+i, 0, 0, 0, TZ),
 		})
 	}
 
@@ -123,7 +134,7 @@ func TestPlay500(t *testing.T) {
 			Loser:       opponent,
 			WinnerScore: intPointer(11),
 			LoserScore:  intPointer(5),
-			CreatedAt:   time.Date(2023, 1, 1, 0, i, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2023, 1, 1, 0, i, 0, 0, TZ),
 		})
 	}
 
@@ -142,7 +153,7 @@ func TestPlay500(t *testing.T) {
 
 func TestDailyWin5ConsecutiveAgainstSameOpponent(t *testing.T) {
 	var playerGames []models.Game
-	gameDay := time.Date(2023, 5, 5, 0, 0, 0, 0, time.UTC)
+	gameDay := time.Date(2023, 5, 5, 0, 0, 0, 0, TZ)
 	for i := range 5 {
 		playerGames = append(playerGames, models.Game{
 			ID:          i + 1,
@@ -173,7 +184,7 @@ func TestDailyWin5ConsecutiveAgainstSameOpponent(t *testing.T) {
 
 func TestPlayOpponent25(t *testing.T) {
 	var playerGames []models.Game
-	d := time.Date(2023, 2, 1, 10, 0, 0, 0, time.UTC)
+	d := time.Date(2023, 2, 1, 10, 0, 0, 0, TZ)
 
 	for i := range 25 {
 		// Alternate winner to ensure it's not win-streak dependent
@@ -214,7 +225,7 @@ func TestPlay5Opponents(t *testing.T) {
 			Loser:       opp,
 			WinnerScore: intPointer(11),
 			LoserScore:  intPointer(5),
-			CreatedAt:   time.Date(2023, 3, 1+i, 10, 0, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2023, 3, 1+i, 10, 0, 0, 0, TZ),
 		})
 	}
 
@@ -233,7 +244,7 @@ func TestPlay5Opponents(t *testing.T) {
 
 func TestPlay10Day(t *testing.T) {
 	var playerGames []models.Game
-	gameDay := time.Date(2023, 4, 1, 0, 0, 0, 0, time.UTC)
+	gameDay := time.Date(2023, 4, 1, 0, 0, 0, 0, TZ)
 	for i := range 10 {
 		playerGames = append(playerGames, models.Game{
 			ID:          i + 1,
@@ -266,7 +277,7 @@ func TestWinUpset100Elo(t *testing.T) {
 			Loser:       opponent,
 			WinnerScore: intPointer(12),
 			LoserScore:  intPointer(10),
-			CreatedAt:   time.Date(2023, 6, 1, 10, 0, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2023, 6, 1, 10, 0, 0, 0, TZ),
 		},
 	}
 	lastGame := playerGames[len(playerGames)-1]
@@ -292,7 +303,7 @@ func TestEloReach1200(t *testing.T) {
 			Loser:       opponent,
 			WinnerScore: intPointer(11),
 			LoserScore:  intPointer(5),
-			CreatedAt:   time.Date(2023, 7, 1, 10, 0, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2023, 7, 1, 10, 0, 0, 0, TZ),
 		},
 	}
 	lastGame := playerGames[len(playerGames)-1]
@@ -312,7 +323,7 @@ func TestEloReach1200(t *testing.T) {
 
 func TestPlay5DayStreak(t *testing.T) {
 	var playerGames []models.Game
-	startTime := time.Date(2023, 8, 1, 12, 0, 0, 0, time.UTC)
+	startTime := time.Date(2023, 8, 1, 12, 0, 0, 0, TZ)
 	for i := 0; i < 5; i++ {
 		playerGames = append(playerGames, models.Game{
 			ID:          i + 1,
