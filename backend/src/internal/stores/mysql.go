@@ -21,6 +21,13 @@ INSERT INTO players (name)
 VALUES (?);
 `
 
+const SELECT_ACHIEVEMENTS_QUERY string = `
+SELECT
+	id, title, description
+FROM
+	achievement
+`
+
 const SELECT_PLAYER_ACHIEVEMENTS_QUERY string = `
 SELECT 
    a.id, a.title, a.description
@@ -29,7 +36,8 @@ FROM
 		JOIN
 	player_achievement pa ON pa.achievement_id = a.id
 WHERE
-    pa.player_id = ?;
+    pa.player_id = ?
+ORDER BY pa.created_at DESC;
 `
 
 const SELECT_PLAYER_PROFILE_QUERY string = `
@@ -106,6 +114,29 @@ WHERE
 
 type MySQLStore struct {
 	DB *sql.DB
+}
+
+func (s *MySQLStore) GetAchievements() ([]models.Achievement, error) {
+	achievements := make([]models.Achievement, 0)
+
+	rows, err := s.DB.Query(SELECT_ACHIEVEMENTS_QUERY)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching achievements: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var a models.Achievement
+		if err := rows.Scan(&a.ID, &a.Title, &a.Description); err != nil {
+			return nil, fmt.Errorf("error fetching achievements: %v", err)
+		}
+		achievements = append(achievements, a)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error fetching achievements: %v", err)
+	}
+
+	return achievements, nil
 }
 
 func (s *MySQLStore) GetLeaderboard() ([]models.LeaderboardRow, error) {

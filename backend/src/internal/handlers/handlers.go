@@ -16,6 +16,15 @@ type APIHandler struct {
 	stores.Store
 }
 
+func (h *APIHandler) GetAchievements(c *gin.Context) {
+	achievements, err := h.Store.GetAchievements()
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, achievements)
+}
+
 func (h *APIHandler) GetLeaderboard(c *gin.Context) {
 	leaderboard, err := h.Store.GetLeaderboard()
 	if err != nil {
@@ -103,21 +112,6 @@ func (h *APIHandler) InsertGame(c *gin.Context) {
 			log.Printf("ERROR: background update of player achievements failed: %v", err)
 		}
 	}()
-
-	// Wrap the goroutine in an function literal to log any errors that have occured.
-	// go func() {
-
-	// 	defer func() {
-	// 		if r := recover(); r != nil {
-	// 			log.Printf("PANIC recovered in UpdatePlayersEloRating: %v", r)
-	// 		}
-	// 	}()
-
-	// 	err := utils.UpdatePlayersEloRating(h.Store, result.WinnerID, result.LoserID)
-	// 	if err != nil {
-	// 		log.Printf("ERROR: background update of elo rating failed: %v", err)
-	// 	}
-	// }()
 
 	c.IndentedJSON(http.StatusCreated, gin.H{"id": id})
 }

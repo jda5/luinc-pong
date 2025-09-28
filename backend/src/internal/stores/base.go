@@ -6,6 +6,7 @@ import "github.com/jda5/luinc-pong/src/internal/models"
 type EloRatings map[int]float64
 
 type Store interface {
+	GetAchievements() ([]models.Achievement, error)
 	GetLeaderboard() ([]models.LeaderboardRow, error)
 	GetPlayerEloRatings(ids [2]int) (EloRatings, error)
 	GetPlayerGames(id int, limit int) ([]models.Game, error)

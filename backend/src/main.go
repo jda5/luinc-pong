@@ -26,6 +26,7 @@ func main() {
 	)
 	h := handlers.APIHandler{Store: stores.CreateMySQLDAO()}
 
+	router.GET("/achievements", h.GetAchievements)
 	router.GET("/leaderboard", h.GetLeaderboard)
 	router.GET("/players/:id", h.GetPlayerProfile)
 	router.POST("/players", h.InsertPlayer)
