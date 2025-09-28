@@ -44,7 +44,8 @@ func TestCalculateExpectedScoreEqualRatings(t *testing.T) {
 func TestCalculateExpectedScoreSumToOne(t *testing.T) {
 	playerRating := 1025.1
 	opponentRating := 2417.3
-	if CalculateExpectedScore(playerRating, opponentRating)+CalculateExpectedScore(opponentRating, playerRating) != 1 {
-		t.Error("Expected scores do not sum to 1")
+	sumExpected := CalculateExpectedScore(playerRating, opponentRating) + CalculateExpectedScore(opponentRating, playerRating)
+	if (1 - sumExpected) > 0.00001 { // floating point issues
+		t.Errorf("Expected scores do not sum to 1, got: %v", sumExpected)
 	}
 }

@@ -205,15 +205,16 @@ func (s *MySQLStore) GetPlayerGames(id int, limit int) ([]models.Game, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var game models.Game
+		var g models.Game
 		var winner models.Player
 		var loser models.Player
-		if err := rows.Scan(&game.ID, &winner.ID, &winner.Name, &loser.ID, &loser.Name, &game.WinnerScore, &game.LoserScore, &game.CreatedAt); err != nil {
+		if err := rows.Scan(&g.ID, &winner.ID, &winner.Name, &loser.ID, &loser.Name, &g.WinnerScore, &g.LoserScore, &g.CreatedAt); err != nil {
 			return games, fmt.Errorf("error fetching games: %v", err)
 		}
-		game.Winner = winner
-		game.Loser = loser
-		game.CreatedAt = game.CreatedAt.In(s.TZ)
+		g.Winner = winner
+		g.Loser = loser
+		g.CreatedAt = g.CreatedAt.In(s.TZ)
+		games = append(games, g)
 	}
 	if err := rows.Err(); err != nil {
 		return games, fmt.Errorf("error fetching games: %v", err)
@@ -362,8 +363,8 @@ func CreateMySQLDAO() *MySQLStore {
 	cfg.Passwd = os.Getenv("MYSQL_PASSWORD")
 
 	cfg.Net = "tcp"
-	cfg.Addr = "host.docker.internal:3306"
-	cfg.DBName = "table_tennis"
+	cfg.Addr = os.Getenv("MYSQL_HOST")
+	cfg.DBName = os.Getenv("MYSQL_DATABASE")
 
 	cfg.ParseTime = true
 

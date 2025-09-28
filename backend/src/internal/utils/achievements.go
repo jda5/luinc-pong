@@ -85,6 +85,11 @@ func UpdatePlayerAchievements(
 		if err != nil {
 			return fmt.Errorf("error updating player achievements %v", err)
 		}
+		if len(games) == 0 {
+			// nothing to update
+			continue
+		}
+
 		playerAchievements, err := calculatePlayersAchievements(
 			id, games, lastGame, oldRatings, newRatings,
 		)
@@ -194,17 +199,19 @@ func calculatePlayersAchievements(
 			opponentID = game.Loser.ID
 
 			// ---------------------------------------- score-based
-			if *game.WinnerScore == 11 {
-				switch *game.LoserScore {
-				case 0:
-					a.InsertID(WIN_11_0)
-				case 1:
-					a.InsertID(WIN_11_1)
+			if notNilPointer(game.WinnerScore) {
+				if *game.WinnerScore == 11 {
+					switch *game.LoserScore {
+					case 0:
+						a.InsertID(WIN_11_0)
+					case 1:
+						a.InsertID(WIN_11_1)
+					}
+				} else if *game.WinnerScore == 12 && *game.LoserScore == 10 {
+					a.InsertID(WIN_12_10)
+				} else if *game.WinnerScore >= 15 {
+					a.InsertID(WIN_WITH_MORE_THAN_14_POINTS)
 				}
-			} else if *game.WinnerScore == 12 && *game.LoserScore == 10 {
-				a.InsertID(WIN_12_10)
-			} else if *game.WinnerScore >= 15 {
-				a.InsertID(WIN_WITH_MORE_THAN_14_POINTS)
 			}
 
 			// ---------------------------------------- winning streaks
@@ -227,8 +234,10 @@ func calculatePlayersAchievements(
 			if loseStreak == 5 {
 				a.InsertID(LOSE_5_CONSECUTIVE)
 			}
-			if *game.WinnerScore == 12 && *game.LoserScore == 10 {
-				a.InsertID(LOSE_12_10)
+			if notNilPointer(game.WinnerScore) && notNilPointer(game.LoserScore) {
+				if *game.WinnerScore == 12 && *game.LoserScore == 10 {
+					a.InsertID(LOSE_12_10)
+				}
 			}
 		}
 

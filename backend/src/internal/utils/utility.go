@@ -29,3 +29,7 @@ func boolToInt(b bool) int {
 	}
 	return i
 }
+
+func notNilPointer[T any](p *T) bool {
+	return p != nil
+}
