@@ -79,25 +79,45 @@ func (h *APIHandler) InsertGame(c *gin.Context) {
 		return
 	}
 
-	// Wrap the goroutine in an function literal to log any errors that have occured.
+	oldRatings, newRatings, err := utils.UpdatePlayersEloRating(h.Store, result.WinnerID, result.LoserID)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
 	go func() {
 
 		// Recover is a built-in function that regains control of a panicking goroutine.
 		// Recover is only useful inside deferred functions.
-		// During normal execution, a call to recover will return nil and have no other effect.
-		// If the current goroutine is panicking, a call to recover will capture the value given
-		// to panic and resume normal execution.
+		// 	// During normal execution, a call to recover will return nil and have no other effect.
+		// 	// If the current goroutine is panicking, a call to recover will capture the value given
+		// 	// to panic and resume normal execution.
 		defer func() {
 			if r := recover(); r != nil {
-				log.Printf("PANIC recovered in UpdatePlayersEloRating: %v", r)
+				log.Printf("PANIC recovered in UpdatePlayerAchievements: %v", r)
 			}
 		}()
 
-		err := utils.UpdatePlayersEloRating(h.Store, result.WinnerID, result.LoserID)
+		err := utils.UpdatePlayerAchievements(h.Store, result, oldRatings, newRatings)
 		if err != nil {
-			log.Printf("ERROR: background update of elo rating failed: %v", err)
+			log.Printf("ERROR: background update of player achievements failed: %v", err)
 		}
 	}()
+
+	// Wrap the goroutine in an function literal to log any errors that have occured.
+	// go func() {
+
+	// 	defer func() {
+	// 		if r := recover(); r != nil {
+	// 			log.Printf("PANIC recovered in UpdatePlayersEloRating: %v", r)
+	// 		}
+	// 	}()
+
+	// 	err := utils.UpdatePlayersEloRating(h.Store, result.WinnerID, result.LoserID)
+	// 	if err != nil {
+	// 		log.Printf("ERROR: background update of elo rating failed: %v", err)
+	// 	}
+	// }()
 
 	c.IndentedJSON(http.StatusCreated, gin.H{"id": id})
 }

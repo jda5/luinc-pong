@@ -23,12 +23,14 @@ func CalculateNewRating(playerRating float64, opponentRating float64, score int,
 // Pass interfaces by value. The interface itself is a small value, but it
 // contains a pointer to the underlying concrete data (like *MySQLStore),
 // so methods will correctly operate on the shared store instance.
-func UpdatePlayersEloRating(s stores.Store, winnerId int, loserId int) error {
+
+// Returns the players' old ratings, their new ratings and an error.
+func UpdatePlayersEloRating(s stores.Store, winnerId int, loserId int) (stores.EloRatings, stores.EloRatings, error) {
 
 	// fetch player elo rating
 	ratingMap, err := s.GetPlayerEloRatings([2]int{winnerId, loserId})
 	if err != nil {
-		return err
+		return ratingMap, ratingMap, err
 	}
 
 	winnerRating := ratingMap[winnerId]
@@ -39,5 +41,14 @@ func UpdatePlayersEloRating(s stores.Store, winnerId int, loserId int) error {
 	ratingMap[loserId] = CalculateNewRating(loserRating, winnerRating, 0, 40)
 
 	// update the ratings
-	return s.UpdateEloRatings(ratingMap)
+	err = s.UpdateEloRatings(ratingMap)
+	if err != nil {
+		return ratingMap, ratingMap, err
+	}
+
+	oldRatings := stores.EloRatings{
+		winnerId: winnerRating,
+		loserId:  loserRating,
+	}
+	return oldRatings, ratingMap, nil
 }

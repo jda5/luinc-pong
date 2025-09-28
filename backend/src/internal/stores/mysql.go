@@ -74,7 +74,7 @@ FROM
 WHERE
     g.winner_id = ? OR g.loser_id = ?
 ORDER BY g.created_at DESC
-LIMIT 20;
+LIMIT ?;
 `
 
 const SELECT_LEADERBOARD_QUERY string = `
@@ -163,8 +163,28 @@ func (s *MySQLStore) GetPlayerEloRatings(ids [2]int) (EloRatings, error) {
 	return ratings, nil
 }
 
-func (s *MySQLStore) GetPlayerGames(id int) ([]models.Game, error) {
+func (s *MySQLStore) GetPlayerGames(id int, limit int) ([]models.Game, error) {
+	games := make([]models.Game, 0)
+	rows, err := s.DB.Query(SELECT_PLAYER_GAMES, id, id, limit)
+	if err != nil {
+		return games, fmt.Errorf("error fetching games: %v", err)
+	}
+	defer rows.Close()
 
+	for rows.Next() {
+		var game models.Game
+		var winner models.Player
+		var loser models.Player
+		if err := rows.Scan(&game.ID, &winner.ID, &winner.Name, &loser.ID, &loser.Name, &game.WinnerScore, &game.LoserScore, &game.CreatedAt); err != nil {
+			return games, fmt.Errorf("error fetching games: %v", err)
+		}
+		game.Winner = winner
+		game.Loser = loser
+	}
+	if err := rows.Err(); err != nil {
+		return games, fmt.Errorf("error fetching games: %v", err)
+	}
+	return games, nil
 }
 
 func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
@@ -184,31 +204,11 @@ func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
 
 	// ---------------------------------------- recent games
 
-	gameRows, err := s.DB.Query(SELECT_PLAYER_GAMES, id, id)
+	recentGames, err := s.GetPlayerGames(id, 20)
 	if err != nil {
 		return profile, fmt.Errorf("error fetching profile (recent games): %v", err)
 	}
-	defer gameRows.Close()
-
-	for gameRows.Next() {
-		var game models.Game
-		var winner models.Player
-		var loser models.Player
-		if err := gameRows.Scan(&game.ID, &winner.ID, &winner.Name, &loser.ID, &loser.Name, &game.WinnerScore, &game.LoserScore, &game.CreatedAt); err != nil {
-			return profile, fmt.Errorf("error fetching profile (recent games): %v", err)
-		}
-		game.Winner = winner
-		game.Loser = loser
-		profile.RecentGames = append(profile.RecentGames, game)
-	}
-	if err := gameRows.Err(); err != nil {
-		return profile, fmt.Errorf("error fetching profile (recent games): %v", err)
-	}
-
-	if len(profile.RecentGames) == 0 {
-		// to return an empty array instead of null for JSON
-		profile.RecentGames = make([]models.Game, 0)
-	}
+	profile.RecentGames = recentGames
 
 	// ---------------------------------------- achievements
 
@@ -258,6 +258,36 @@ func (s *MySQLStore) InsertPlayer(name string) (int64, error) {
 		return 0, fmt.Errorf("error inserting player: %v", err)
 	}
 	return id, nil
+}
+
+func (s *MySQLStore) InsertPlayerAchievements(id int, achievementIDs []models.AchievementID) error {
+	if len(achievementIDs) == 0 {
+		return nil // No achievements to insert; avoid invalid query
+	}
+
+	insertQuery := "INSERT IGNORE INTO player_achievement (player_id, achievement_id) VALUES "
+	vals := []any{}
+
+	for _, achievementID := range achievementIDs {
+		insertQuery += "(?, ?),"
+		vals = append(vals, id, int(achievementID))
+	}
+	// trim the last ,
+	insertQuery = insertQuery[0 : len(insertQuery)-1]
+
+	// prepare the statement
+	stmt, err := s.DB.Prepare(insertQuery)
+	if err != nil {
+		return fmt.Errorf("error preparing insert statement: %v", err)
+	}
+	defer stmt.Close()
+
+	// format all vals at once
+	_, err = stmt.Exec(vals...)
+	if err != nil {
+		return fmt.Errorf("error inserting player achievements: %v", err)
+	}
+	return nil
 }
 
 func (s *MySQLStore) UpdateEloRatings(players EloRatings) error {

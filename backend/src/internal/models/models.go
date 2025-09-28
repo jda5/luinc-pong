@@ -16,6 +16,8 @@ type Achievement struct {
 	Description string `json:"description"`
 }
 
+type AchievementID int
+
 // ---------------------------------------- players
 
 type PlayerID struct {
