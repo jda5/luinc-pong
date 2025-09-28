@@ -115,7 +115,7 @@ INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (11, 'Heartbreaker', 'Lose 10–12');
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (12, 'Streaky', 'Win 5 games in a row');
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (13, 'Unstoppable', 'Win 10 games in a row');
-INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (14, 'Probably Cheating', 'Win 15 games in a row');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (14, 'Immortal', 'Win 15 games in a row');
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (15, 'I Get Knocked Down', 'Lose 5 games in a row');
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (16, 'Hat Trick', 'Beat the same opponent 3 times in a row in a single day');
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (17, 'Brutal', 'Beat the same opponent 5 times in a row in a single day');

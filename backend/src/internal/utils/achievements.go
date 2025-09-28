@@ -30,7 +30,7 @@ const (
 
 	WIN_5_CONSECUTIVE  // streaky
 	WIN_10_CONSECUTIVE // unstoppable
-	WIN_15_CONSECUTIVE // probably cheating
+	WIN_15_CONSECUTIVE // immortal
 
 	LOSE_5_CONSECUTIVE                            // i get knocked down, but i get up again
 	DAILY_WIN_3_CONSECUTIVE_AGAINST_SAME_OPPONENT // hat trick
