@@ -1,6 +1,7 @@
-import { LeaderboardRow, PlayerProfile, GameResult, PlayerCreate } from '../types';
+import { LeaderboardRow, PlayerProfile, GameResult, PlayerCreate, Achievement } from '../types';
 
-const API_BASE_URL = 'https://api.luincpong.com';
+// const API_BASE_URL = 'https://api.luincpong.com';
+const API_BASE_URL = 'http://localhost:8080';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -35,6 +36,10 @@ export const api = {
   // GET /leaderboard (not /leaderboards)
   getLeaderboard: (): Promise<LeaderboardRow[]> =>
     fetchApi<LeaderboardRow[]>('/leaderboard'),
+
+  // GET /achievements
+  getAchievements: (): Promise<Achievement[]> =>
+    fetchApi<Achievement[]>('/achievements'),
 
   // GET /players/:id
   getPlayer: (id: number): Promise<PlayerProfile> =>

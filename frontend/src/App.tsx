@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
 import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Trophy } from 'lucide-react';
 import { api } from './api';
 import type { GameResult, PlayerCreate } from './types';
 import AuthWrapper from './components/AuthWrapper';
+import AchievementsPage from './components/AchievementsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -361,8 +363,15 @@ const HomePage: React.FC = () => {
       <header className="border-b border-grey-100 bg-white sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="athletic-display text-4xl">LUINC PONG</h1>
+            <h1 className="athletic-display text-4xl">🏓 LUinc. Pong</h1>
             <div className="flex gap-3">
+              <Link
+                to="/achievements"
+                className="athletic-btn athletic-btn-secondary flex items-center gap-2"
+              >
+                <Trophy size={16} />
+                Achievements
+              </Link>
               <button
                 onClick={() => setShowAddPlayer(true)}
                 className="athletic-btn athletic-btn-secondary"
@@ -515,20 +524,44 @@ const PlayerPage: React.FC = () => {
         </div>
 
         {/* Personal Records Grid */}
+                {/* Personal Records Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="pr-stat">
-            <div className="pr-value">{player.eloRating != null ? Math.round(player.eloRating) : '1000'}</div>
-            <div className="pr-label">ELO Rating</div>
+            <div className="pr-value">{Math.round(player.eloRating)}</div>
+            <div className="pr-label">ELO RATING</div>
+          </div>
+          <div className="pr-stat">
+            <div className="pr-value">{player.gamesPlayed}</div>
+            <div className="pr-label">GAMES PLAYED</div>
           </div>
           <div className="pr-stat">
             <div className="pr-value">{winPercentage}%</div>
-            <div className="pr-label">Win Rate</div>
-          </div>
-          <div className="pr-stat">
-            <div className="pr-value">{player.gamesPlayed || 0}</div>
-            <div className="pr-label">Games Played</div>
+            <div className="pr-label">WIN RATE</div>
           </div>
         </div>
+
+        {/* Achievements Section */}
+        {player.achievements && player.achievements.length > 0 && (
+          <div className="mb-12">
+            <div className="mb-6">
+              <h2 className="athletic-heading text-2xl mb-2">Achievements</h2>
+              <p className="athletic-label">UNLOCKED MILESTONES</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {player.achievements.map((achievement) => (
+                <div key={achievement.id} className="player-achievement">
+                  <div className="player-achievement-icon">
+                    <Trophy size={16} />
+                  </div>
+                  <div className="player-achievement-content">
+                    <div className="player-achievement-title">{achievement.title}</div>
+                    <div className="player-achievement-description">{achievement.description}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recent Games */}
         <div className="athletic-container">
@@ -606,6 +639,7 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/player/:id" element={<PlayerPage />} />
+                <Route path="/achievements" element={<AchievementsPage />} />
               </Routes>
             </main>
           </div>

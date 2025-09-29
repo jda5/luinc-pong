@@ -18,6 +18,12 @@ export interface Game {
   createdAt: string;
 }
 
+export interface Achievement {
+  id: number;
+  title: string;
+  description: string;
+}
+
 export interface PlayerProfile {
   id: number;
   name: string;
@@ -26,6 +32,7 @@ export interface PlayerProfile {
   gamesPlayed: number;
   gamesWon: number;
   recentGames: Game[];
+  achievements: Achievement[];
 }
 
 // Request body types
