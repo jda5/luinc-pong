@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jda5/luinc-pong/src/internal/models"
