@@ -2,8 +2,8 @@
 services:
 
   backend:
-    build:
-      dockerfile: ./backend/Dockerfile
+    # build:
+    #   dockerfile: ./backend/Dockerfile
 
     platform: linux/amd64
     image: ghcr.io/jda5/luinc-pong:latest
