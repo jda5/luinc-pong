@@ -25,13 +25,22 @@ func (h *APIHandler) GetAchievements(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, achievements)
 }
 
-func (h *APIHandler) GetLeaderboard(c *gin.Context) {
-	leaderboard, err := h.Store.GetLeaderboard()
+// func (h *APIHandler) GetLeaderboard(c *gin.Context) {
+// 	leaderboard, err := h.Store.GetLeaderboard()
+// 	if err != nil {
+// 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+// 		return
+// 	}
+// 	c.IndentedJSON(http.StatusOK, leaderboard)
+// }
+
+func (h *APIHandler) GetIndexPageData(c *gin.Context) {
+	data, err := h.Store.GetIndexPageData()
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, leaderboard)
+	c.IndentedJSON(http.StatusOK, data)
 }
 
 func (h *APIHandler) GetPlayerProfile(c *gin.Context) {

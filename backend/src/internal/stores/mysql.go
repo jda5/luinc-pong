@@ -87,6 +87,14 @@ ORDER BY g.created_at DESC
 LIMIT ?;
 `
 
+const SELECT_TOTAL_GAMES_STATS string = `
+SELECT 
+    COUNT(*) AS total_game_count,
+    SUM(winner_score) + SUM(loser_score) AS total_point_sum
+FROM
+    games;
+`
+
 const SELECT_LEADERBOARD_QUERY string = `
 SELECT 
     id, name, elo_rating
@@ -115,8 +123,10 @@ WHERE
 // ---------------------------------------- interface implementation
 
 type MySQLStore struct {
-	DB *sql.DB
-	TZ *time.Location
+	DB             *sql.DB
+	TZ             *time.Location
+	TotalGameCount int
+	TotalPointSum  int
 }
 
 func (s *MySQLStore) GetAchievements() ([]models.Achievement, error) {
@@ -142,27 +152,55 @@ func (s *MySQLStore) GetAchievements() ([]models.Achievement, error) {
 	return achievements, nil
 }
 
-func (s *MySQLStore) GetLeaderboard() ([]models.LeaderboardRow, error) {
+// func (s *MySQLStore) GetLeaderboard() ([]models.LeaderboardRow, error) {
+// 	leaderboard := make([]models.LeaderboardRow, 0)
+
+// 	rows, err := s.DB.Query(SELECT_LEADERBOARD_QUERY)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("error fetching leaderboard: %v", err)
+// 	}
+// 	defer rows.Close()
+
+// 	for rows.Next() {
+// 		var row models.LeaderboardRow
+// 		if err := rows.Scan(&row.ID, &row.Name, &row.EloRating); err != nil {
+// 			return nil, fmt.Errorf("error fetching leaderboard: %v", err)
+// 		}
+// 		leaderboard = append(leaderboard, row)
+// 	}
+// 	if err := rows.Err(); err != nil {
+// 		return nil, fmt.Errorf("error fetching leaderboard: %v", err)
+// 	}
+
+// 	return leaderboard, nil
+// }
+
+func (s *MySQLStore) GetIndexPageData() (models.IndexPageData, error) {
 	leaderboard := make([]models.LeaderboardRow, 0)
 
 	rows, err := s.DB.Query(SELECT_LEADERBOARD_QUERY)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching leaderboard: %v", err)
+		return models.IndexPageData{}, fmt.Errorf("error fetching leaderboard: %v", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var row models.LeaderboardRow
 		if err := rows.Scan(&row.ID, &row.Name, &row.EloRating); err != nil {
-			return nil, fmt.Errorf("error fetching leaderboard: %v", err)
+			return models.IndexPageData{}, fmt.Errorf("error fetching leaderboard: %v", err)
 		}
 		leaderboard = append(leaderboard, row)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error fetching leaderboard: %v", err)
+		return models.IndexPageData{}, fmt.Errorf("error fetching leaderboard: %v", err)
 	}
 
-	return leaderboard, nil
+	return models.IndexPageData{
+		Leaderboard: leaderboard,
+		GlobalStats: models.GlobalStats{
+			TotalGames: s.TotalGameCount, TotalPoints: s.TotalPointSum,
+		},
+	}, nil
 }
 
 func (s *MySQLStore) GetPlayerEloRatings(ids [2]int) (EloRatings, error) {
@@ -281,6 +319,16 @@ func (s *MySQLStore) InsertGameResult(r models.GameResult) (int64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("error inserting game: unknown player ID")
 	}
+
+	// increment the cached total games played and points
+	s.TotalGameCount++
+	if r.WinnerScore != nil {
+		s.TotalPointSum = s.TotalPointSum + *r.WinnerScore
+	}
+	if r.LoserScore != nil {
+		s.TotalPointSum = s.TotalPointSum + *r.LoserScore
+	}
+
 	return id, nil
 }
 
@@ -384,5 +432,13 @@ func CreateMySQLDAO() *MySQLStore {
 		panic(fmt.Sprintf("error fetching timezone: %v", err))
 	}
 
-	return &MySQLStore{DB: db, TZ: tz}
+	// fetch cached global games statistics
+	var totalGameCount int
+	var totalPointSum int
+	row := db.QueryRow(SELECT_TOTAL_GAMES_STATS)
+	if err := row.Scan(&totalGameCount, &totalPointSum); err != nil {
+		panic(fmt.Sprintf("error fetching global games statistics: %v", err))
+	}
+
+	return &MySQLStore{DB: db, TZ: tz, TotalGameCount: totalGameCount, TotalPointSum: totalPointSum}
 }

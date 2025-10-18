@@ -2,11 +2,14 @@
 services:
 
   backend:
-    # build:
-    #   dockerfile: ./backend/Dockerfile
 
-    platform: linux/amd64
-    image: ghcr.io/jda5/luinc-pong:latest
+    # --- COMMENT OUT IN PRODUCTION ---
+    build:
+      dockerfile: ./backend/Dockerfile
+
+    # platform: linux/amd64
+    # image: ghcr.io/jda5/luinc-pong:latest
+
     container_name: backend
     restart: always
     env_file:
@@ -19,8 +22,9 @@ services:
       # machine on Linux based systems.
       - "host.docker.internal:host-gateway"
 
-    # ports:
-    #   - "8080:8080"
+    # --- COMMENT OUT IN PRODUCTION ---
+    ports:
+      - "8080:8080"
 
     labels:
       # === Traefik Configurations / TLS ===

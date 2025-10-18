@@ -4,6 +4,16 @@ export interface LeaderboardRow {
   eloRating: number;
 }
 
+export interface GlobalStats {
+  totalGames: number;
+  totalPoints: number;
+}
+
+export interface IndexPageData {
+  leaderboard: LeaderboardRow[];
+  globalStats: GlobalStats;
+}
+
 export interface Player {
   id: number;
   name: string;

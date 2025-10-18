@@ -7,7 +7,8 @@ type EloRatings map[int]float64
 
 type Store interface {
 	GetAchievements() ([]models.Achievement, error)
-	GetLeaderboard() ([]models.LeaderboardRow, error)
+	// GetLeaderboard() ([]models.LeaderboardRow, error)
+	GetIndexPageData() (models.IndexPageData, error)
 	GetPlayerEloRatings(ids [2]int) (EloRatings, error)
 	GetPlayerGames(id int, limit int) ([]models.Game, error)
 	GetPlayerProfile(id int) (models.PlayerProfile, error)

@@ -56,7 +56,7 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({ onClose }) => {
   const addPlayerMutation = useMutation<void, Error, PlayerCreate>({
     mutationFn: (data: PlayerCreate) => api.addPlayer(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+      queryClient.invalidateQueries({ queryKey: ['indexPageData'] });
       onClose();
       setName('');
     },
@@ -142,15 +142,15 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ onClose }) => {
   const [loserScore, setLoserScore] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: leaderboard } = useQuery({
-    queryKey: ['leaderboard'],
-    queryFn: api.getLeaderboard,
+  const { data: indexData } = useQuery({
+    queryKey: ['indexPageData'],
+    queryFn: api.getIndexPageData,
   });
 
   const addGameMutation = useMutation<void, Error, GameResult>({
     mutationFn: (data: GameResult) => api.addGame(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+      queryClient.invalidateQueries({ queryKey: ['indexPageData'] });
       queryClient.invalidateQueries({ queryKey: ['player'] });
       onClose();
       setWinnerId('');
@@ -206,7 +206,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ onClose }) => {
                 required
               >
                 <option value="">Select winner</option>
-                {leaderboard?.map((player) => (
+                {indexData?.leaderboard?.map((player) => (
                   <option key={player.id} value={player.id}>
                     {player.name}
                   </option>
@@ -223,7 +223,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ onClose }) => {
                 required
               >
                 <option value="">Select loser</option>
-                {leaderboard?.map((player) => (
+                {indexData?.leaderboard?.map((player) => (
                   <option key={player.id} value={player.id}>
                     {player.name}
                   </option>
@@ -304,9 +304,9 @@ const HomePage: React.FC = () => {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [showAddGame, setShowAddGame] = useState(false);
 
-  const { data: leaderboard, isLoading, error } = useQuery({
-    queryKey: ['leaderboard'],
-    queryFn: api.getLeaderboard,
+  const { data: indexData, isLoading, error } = useQuery({
+    queryKey: ['indexPageData'],
+    queryFn: api.getIndexPageData,
   });
 
   if (isLoading) {
@@ -314,7 +314,7 @@ const HomePage: React.FC = () => {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="athletic-spinner mx-auto mb-4"></div>
-          <p className="athletic-body text-grey-300">Loading leaderboard...</p>
+          <p className="athletic-body text-grey-300">Loading...</p>
         </div>
       </div>
     );
@@ -333,7 +333,7 @@ const HomePage: React.FC = () => {
           <p className="athletic-body text-grey-300 mb-4">
             {isNetworkError 
               ? 'Cannot connect to the backend server at http://backend:8080' 
-              : 'There was an error loading the leaderboard'}
+              : 'There was an error loading LUinc. Pong'}
           </p>
           <p className="athletic-label mb-6 text-red-600">
             {errorMessage}
@@ -391,6 +391,20 @@ const HomePage: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
+        {/* Global Stats */}
+        {indexData?.globalStats && (
+          <div className="grid grid-cols-2 gap-6 mb-8">
+            <div className="pr-stat">
+              <div className="pr-value">{indexData.globalStats.totalGames.toLocaleString()}</div>
+              <div className="pr-label">TOTAL GAMES</div>
+            </div>
+            <div className="pr-stat">
+              <div className="pr-value">{indexData.globalStats.totalPoints.toLocaleString()}</div>
+              <div className="pr-label">TOTAL POINTS</div>
+            </div>
+          </div>
+        )}
+
         <div className="athletic-container">
           <div className="mb-8">
             <h2 className="athletic-heading text-2xl mb-2">Leaderboard</h2>
@@ -407,8 +421,8 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Player Rows */}
-            {leaderboard && leaderboard.length > 0 ? (
-              leaderboard.map((player, index) => (
+            {indexData?.leaderboard && indexData.leaderboard.length > 0 ? (
+              indexData.leaderboard.map((player, index) => (
                 <Link
                   key={player.id}
                   to={`/player/${player.id}`}

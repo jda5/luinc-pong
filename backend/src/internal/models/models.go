@@ -2,10 +2,22 @@ package models
 
 import "time"
 
+// ---------------------------------------- index page
+
 type LeaderboardRow struct {
 	ID        int     `json:"id"`
 	Name      string  `json:"name"`
 	EloRating float64 `json:"eloRating"`
+}
+
+type GlobalStats struct {
+	TotalGames  int `json:"totalGames"`
+	TotalPoints int `json:"totalPoints"`
+}
+
+type IndexPageData struct {
+	Leaderboard []LeaderboardRow `json:"leaderboard"`
+	GlobalStats GlobalStats      `json:"globalStats"`
 }
 
 // ---------------------------------------- achievements
