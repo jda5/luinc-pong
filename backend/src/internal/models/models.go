@@ -77,3 +77,38 @@ type Game struct {
 	LoserScore  *int      `json:"loserScore"`
 	CreatedAt   time.Time `json:"createdAt"`
 }
+
+// ---------------------------------------- head-to-head
+
+type PlayerHeadToHeadStats struct {
+	ID               int     `json:"id"`
+	Name             string  `json:"name"`
+	GamesWon         int     `json:"gamesWon"`
+	WinProbability   float64 `json:"winProbability"`
+	LongestWinStreak int     `json:"longestWinStreak"`
+}
+
+type ScoreStats struct {
+	AvgScoreDifferential float64    `json:"avgScoreDifferential"`
+	BiggestBlowout       GameResult `json:"biggestBlowout"`
+	MostCompetitive      GameResult `json:"mostCompetitive"`
+}
+
+type HeadToHeadPlayerStats struct {
+	ID               int     `json:"id"`
+	Name             string  `json:"name"`
+	GamesWon         int     `json:"gamesWon"`
+	WinProbability   float64 `json:"winProbability"`
+	LongestWinStreak int     `json:"longestWinStreak"`
+	TotalPoints      int     `json:"totalPoints"`
+	AvgPointsPerGame float64 `json:"avgPointsPerGame"`
+}
+
+type HeadToHead struct {
+	Player1        HeadToHeadPlayerStats `json:"player1"`
+	Player2        HeadToHeadPlayerStats `json:"player2"`
+	FirstPlayedAt  time.Time             `json:"firstPlayedAt"`
+	TotalGameCount int                   `json:"totalGameCount"`
+	RecentGames    []Game                `json:"recentGames"`
+	ScoreStats     ScoreStats            `json:"scoreStats"`
+}

@@ -3,7 +3,7 @@ package utils
 import (
 	"math"
 
-	"github.com/jda5/luinc-pong/src/internal/stores"
+	"github.com/jda5/luinc-pong/src/internal/models"
 )
 
 // CalculateExpectedScore determines the probability of a player winning against an opponent
@@ -25,7 +25,7 @@ func CalculateNewRating(playerRating float64, opponentRating float64, score int,
 // so methods will correctly operate on the shared store instance.
 
 // Returns the players' old ratings, their new ratings and an error.
-func UpdatePlayersEloRating(s stores.Store, winnerId int, loserId int) (stores.EloRatings, stores.EloRatings, error) {
+func UpdatePlayersEloRating(s models.Store, winnerId int, loserId int) (models.EloRatings, models.EloRatings, error) {
 
 	// fetch player elo rating
 	ratingMap, err := s.GetPlayerEloRatings([2]int{winnerId, loserId})
@@ -46,9 +46,24 @@ func UpdatePlayersEloRating(s stores.Store, winnerId int, loserId int) (stores.E
 		return ratingMap, ratingMap, err
 	}
 
-	oldRatings := stores.EloRatings{
+	oldRatings := models.EloRatings{
 		winnerId: winnerRating,
 		loserId:  loserRating,
 	}
 	return oldRatings, ratingMap, nil
+}
+
+func GetWinProbabilities(s models.Store, winnerId int, loserId int) (float64, float64, error) {
+	ratingMap, err := s.GetPlayerEloRatings([2]int{winnerId, loserId})
+	if err != nil {
+		return 0, 0, err
+	}
+
+	winnerRating := ratingMap[winnerId]
+	loserRating := ratingMap[loserId]
+
+	winnerProb := CalculateExpectedScore(winnerRating, loserRating)
+	loserProb := CalculateExpectedScore(loserRating, winnerRating)
+
+	return winnerProb, loserProb, nil
 }

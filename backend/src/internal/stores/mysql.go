@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jda5/luinc-pong/src/internal/models"
+	"github.com/jda5/luinc-pong/src/internal/utils"
 )
 
 // ---------------------------------------- queries
@@ -39,7 +40,7 @@ FROM
 	player_achievement pa ON pa.achievement_id = a.id
 WHERE
     pa.player_id = ?
-ORDER BY pa.created_at DESC;
+ORDER BY pa.created_at DESC, a.id DESC;
 `
 
 const SELECT_PLAYER_PROFILE_QUERY string = `
@@ -85,6 +86,28 @@ WHERE
     g.winner_id = ? OR g.loser_id = ?
 ORDER BY g.created_at DESC
 LIMIT ?;
+`
+
+const SELECT_GAMES string = `
+SELECT
+	g.id AS game_id,
+    w.id AS winner_id,
+    w.name AS winner_name,
+    l.id AS loser_id,
+    l.name AS loser_name,
+    g.winner_score,
+    g.loser_score,
+    g.created_at
+FROM
+    games g
+        LEFT JOIN
+    players w ON g.winner_id = w.id
+        LEFT JOIN
+    players l ON g.loser_id = l.id
+WHERE
+    (g.winner_id = ? AND g.loser_id = ?)
+		OR (g.winner_id = ? AND g.loser_id = ?)
+ORDER BY g.created_at DESC;
 `
 
 const SELECT_TOTAL_GAMES_STATS string = `
@@ -152,28 +175,178 @@ func (s *MySQLStore) GetAchievements() ([]models.Achievement, error) {
 	return achievements, nil
 }
 
-// func (s *MySQLStore) GetLeaderboard() ([]models.LeaderboardRow, error) {
-// 	leaderboard := make([]models.LeaderboardRow, 0)
+func (s *MySQLStore) GetHeadToHead(p1 int, p2 int) (models.HeadToHead, error) {
+	h := models.HeadToHead{}
 
-// 	rows, err := s.DB.Query(SELECT_LEADERBOARD_QUERY)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error fetching leaderboard: %v", err)
-// 	}
-// 	defer rows.Close()
+	rows, err := s.DB.Query(SELECT_GAMES, p1, p2, p2, p1)
+	if err != nil {
+		return h, fmt.Errorf("error fetching head-to-head stats: %v", err)
+	}
+	defer rows.Close()
 
-// 	for rows.Next() {
-// 		var row models.LeaderboardRow
-// 		if err := rows.Scan(&row.ID, &row.Name, &row.EloRating); err != nil {
-// 			return nil, fmt.Errorf("error fetching leaderboard: %v", err)
-// 		}
-// 		leaderboard = append(leaderboard, row)
-// 	}
-// 	if err := rows.Err(); err != nil {
-// 		return nil, fmt.Errorf("error fetching leaderboard: %v", err)
-// 	}
+	// Initialize tracking variables
+	var (
+		p1Streak      int
+		p2Streak      int
+		recordedCount int
+		gameIndex     int
+		scores        = models.ScoreStats{}
+	)
 
-// 	return leaderboard, nil
-// }
+	for rows.Next() {
+		var game models.Game
+		var winner models.Player
+		var loser models.Player
+
+		err := rows.Scan(
+			&game.ID,
+			&winner.ID,
+			&winner.Name,
+			&loser.ID,
+			&loser.Name,
+			&game.WinnerScore,
+			&game.LoserScore,
+			&game.CreatedAt,
+		)
+		if err != nil {
+			return h, fmt.Errorf("error scanning game: %v", err)
+		}
+
+		game.Winner = winner
+		game.Loser = loser
+		game.CreatedAt = game.CreatedAt.In(s.TZ)
+
+		// Initialize players on first game
+		if gameIndex == 0 {
+			if p1 == winner.ID {
+				h.Player1.ID = winner.ID
+				h.Player1.Name = winner.Name
+				h.Player2.ID = loser.ID
+				h.Player2.Name = loser.Name
+			} else {
+				h.Player1.ID = loser.ID
+				h.Player1.Name = loser.Name
+				h.Player2.ID = winner.ID
+				h.Player2.Name = winner.Name
+			}
+			h.FirstPlayedAt = game.CreatedAt
+		}
+
+		// Track last 30 games
+		if gameIndex < 30 {
+			h.RecentGames = append(h.RecentGames, game)
+		}
+
+		// Update player statistics based on who won
+		if winner.ID == h.Player1.ID {
+			// Player 1 won
+			h.Player1.GamesWon++
+
+			if game.WinnerScore != nil {
+				h.Player1.TotalPoints += *game.WinnerScore
+			}
+			if game.LoserScore != nil {
+				h.Player2.TotalPoints += *game.LoserScore
+			}
+
+			p1Streak++
+			h.Player1.LongestWinStreak = max(h.Player1.LongestWinStreak, p1Streak)
+			p2Streak = 0
+		} else {
+			// Player 2 won
+			h.Player2.GamesWon++
+
+			if game.WinnerScore != nil {
+				h.Player2.TotalPoints += *game.WinnerScore
+			}
+			if game.LoserScore != nil {
+				h.Player1.TotalPoints += *game.LoserScore
+			}
+
+			p2Streak++
+			h.Player2.LongestWinStreak = max(h.Player2.LongestWinStreak, p2Streak)
+			p1Streak = 0
+		}
+
+		// Update score statistics for games with recorded scores
+		if game.WinnerScore != nil && game.LoserScore != nil {
+			recordedCount++
+
+			winnerScore := *game.WinnerScore
+			loserScore := *game.LoserScore
+			scoreDiff := winnerScore - loserScore
+
+			// Track average score differential
+			scores.AvgScoreDifferential += float64(scoreDiff)
+
+			// Track biggest blowout (largest score difference)
+			if scores.BiggestBlowout.WinnerScore == nil {
+				scores.BiggestBlowout = models.GameResult{
+					WinnerID:    game.Winner.ID,
+					LoserID:     game.Loser.ID,
+					WinnerScore: game.WinnerScore,
+					LoserScore:  game.LoserScore,
+				}
+			} else {
+				existingDiff := *scores.BiggestBlowout.WinnerScore - *scores.BiggestBlowout.LoserScore
+				if scoreDiff > existingDiff {
+					scores.BiggestBlowout = models.GameResult{
+						WinnerID:    game.Winner.ID,
+						LoserID:     game.Loser.ID,
+						WinnerScore: game.WinnerScore,
+						LoserScore:  game.LoserScore,
+					}
+				}
+			}
+
+			// Track most competitive game (highest total points)
+			totalPoints := winnerScore + loserScore
+			if scores.MostCompetitive.WinnerScore == nil {
+				scores.MostCompetitive = models.GameResult{
+					WinnerID:    game.Winner.ID,
+					LoserID:     game.Loser.ID,
+					WinnerScore: game.WinnerScore,
+					LoserScore:  game.LoserScore,
+				}
+			} else {
+				existingTotal := *scores.MostCompetitive.WinnerScore + *scores.MostCompetitive.LoserScore
+				if totalPoints > existingTotal {
+					scores.MostCompetitive = models.GameResult{
+						WinnerID:    game.Winner.ID,
+						LoserID:     game.Loser.ID,
+						WinnerScore: game.WinnerScore,
+						LoserScore:  game.LoserScore,
+					}
+				}
+			}
+		}
+
+		gameIndex++
+	}
+
+	// Check for errors during iteration
+	if err := rows.Err(); err != nil {
+		return h, fmt.Errorf("error iterating games: %v", err)
+	}
+
+	// Calculate averages if we have recorded games
+	if recordedCount > 0 {
+		count := float64(recordedCount)
+		scores.AvgScoreDifferential = scores.AvgScoreDifferential / count
+		h.Player1.AvgPointsPerGame = float64(h.Player1.TotalPoints) / count
+		h.Player2.AvgPointsPerGame = float64(h.Player2.TotalPoints) / count
+	}
+	h.ScoreStats = scores
+	h.TotalGameCount = gameIndex
+
+	// Calculate win probabilities
+	h.Player1.WinProbability, h.Player2.WinProbability, err = utils.GetWinProbabilities(s, h.Player1.ID, h.Player2.ID)
+	if err != nil {
+		return h, fmt.Errorf("error calculating win probabilities: %v", err)
+	}
+
+	return h, nil
+}
 
 func (s *MySQLStore) GetIndexPageData() (models.IndexPageData, error) {
 	leaderboard := make([]models.LeaderboardRow, 0)
@@ -203,10 +376,10 @@ func (s *MySQLStore) GetIndexPageData() (models.IndexPageData, error) {
 	}, nil
 }
 
-func (s *MySQLStore) GetPlayerEloRatings(ids [2]int) (EloRatings, error) {
+func (s *MySQLStore) GetPlayerEloRatings(ids [2]int) (models.EloRatings, error) {
 
 	// need to use the make() function when creating a map
-	ratings := make(EloRatings)
+	ratings := make(models.EloRatings)
 
 	rows, err := s.DB.Query(SELECT_PLAYER_ELO_RATINGS, ids[0], ids[1])
 	if err != nil {
@@ -374,7 +547,7 @@ func (s *MySQLStore) InsertPlayerAchievements(id int, achievementIDs []models.Ac
 	return nil
 }
 
-func (s *MySQLStore) UpdateEloRatings(players EloRatings) error {
+func (s *MySQLStore) UpdateEloRatings(players models.EloRatings) error {
 	tx, err := s.DB.Begin()
 	if err != nil {
 		return fmt.Errorf("error updating Players Elo rating: %v", err)

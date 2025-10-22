@@ -8,13 +8,34 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jda5/luinc-pong/src/internal/models"
-	"github.com/jda5/luinc-pong/src/internal/stores"
 	"github.com/jda5/luinc-pong/src/internal/utils"
 )
 
 type APIHandler struct {
-	stores.Store
+	models.Store
 }
+
+// ---------------------------------------- internal helpers
+
+func parsePlayerID(c *gin.Context, paramName string) (int, error) {
+	idString := c.Query(paramName)
+	if idString == "" {
+		return 0, fmt.Errorf("missing required parameter: %s", paramName)
+	}
+
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		return 0, fmt.Errorf("'%s' is not a valid integer", idString)
+	}
+
+	if id <= 0 {
+		return 0, fmt.Errorf("player ID must be positive")
+	}
+
+	return id, nil
+}
+
+// ---------------------------------------- public API
 
 func (h *APIHandler) GetAchievements(c *gin.Context) {
 	achievements, err := h.Store.GetAchievements()
@@ -25,16 +46,7 @@ func (h *APIHandler) GetAchievements(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, achievements)
 }
 
-// func (h *APIHandler) GetLeaderboard(c *gin.Context) {
-// 	leaderboard, err := h.Store.GetLeaderboard()
-// 	if err != nil {
-// 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-// 		return
-// 	}
-// 	c.IndentedJSON(http.StatusOK, leaderboard)
-// }
-
-func (h *APIHandler) GetIndexPageData(c *gin.Context) {
+func (h *APIHandler) GetIndexPage(c *gin.Context) {
 	data, err := h.Store.GetIndexPageData()
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -44,10 +56,9 @@ func (h *APIHandler) GetIndexPageData(c *gin.Context) {
 }
 
 func (h *APIHandler) GetPlayerProfile(c *gin.Context) {
-	idString := c.Param("id")
-	id, err := strconv.Atoi(idString)
+	id, err := parsePlayerID(c, "id")
 	if err != nil {
-		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"message": fmt.Sprintf("'%s' is not a valid interger", idString)})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -57,6 +68,33 @@ func (h *APIHandler) GetPlayerProfile(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusOK, profile)
+}
+
+func (h *APIHandler) GetHeadToHead(c *gin.Context) {
+	p1, err := parsePlayerID(c, "p1")
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	p2, err := parsePlayerID(c, "p2")
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	if p1 == p2 {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "p1 and p2 must be different players"})
+		return
+	}
+
+	headToHead, err := h.Store.GetHeadToHead(p1, p2)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, headToHead)
 }
 
 func (h *APIHandler) InsertPlayer(c *gin.Context) {

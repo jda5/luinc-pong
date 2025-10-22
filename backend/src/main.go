@@ -26,10 +26,10 @@ func main() {
 	)
 	h := handlers.APIHandler{Store: stores.CreateMySQLDAO()}
 
-	router.GET("/", h.GetIndexPageData)
+	router.GET("/", h.GetIndexPage)
 	router.GET("/achievements", h.GetAchievements)
-	// router.GET("/leaderboard", h.GetLeaderboard)
 	router.GET("/players/:id", h.GetPlayerProfile)
+	router.GET("/head-to-head", h.GetHeadToHead)
 	router.POST("/players", h.InsertPlayer)
 	router.POST("/games", h.InsertGame)
 

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jda5/luinc-pong/src/internal/models"
-	"github.com/jda5/luinc-pong/src/internal/stores"
 )
 
 // -------------------------------------------------------------------------------- Test Helpers
@@ -36,11 +35,11 @@ func gameToGameResult(g models.Game) models.GameResult {
 }
 
 // createStandardEloRatings provides default ELO ratings for a game.
-func createStandardEloRatings(g models.Game) (stores.EloRatings, stores.EloRatings) {
-	return stores.EloRatings{
+func createStandardEloRatings(g models.Game) (models.EloRatings, models.EloRatings) {
+	return models.EloRatings{
 			g.Winner.ID: 1000,
 			g.Loser.ID:  1000,
-		}, stores.EloRatings{
+		}, models.EloRatings{
 			g.Winner.ID: 1016,
 			g.Loser.ID:  984,
 		}
@@ -282,8 +281,8 @@ func TestWinUpset100Elo(t *testing.T) {
 	}
 	lastGame := playerGames[len(playerGames)-1]
 	// Player ELO is 100 less than opponent's ELO
-	oldRatings := stores.EloRatings{player.ID: 1000, opponent.ID: 1100}
-	newRating := stores.EloRatings{player.ID: 1025, opponent.ID: 1075}
+	oldRatings := models.EloRatings{player.ID: 1000, opponent.ID: 1100}
+	newRating := models.EloRatings{player.ID: 1025, opponent.ID: 1075}
 
 	achievements, err := calculatePlayersAchievements(player.ID, playerGames, gameToGameResult(lastGame), oldRatings, newRating)
 	if err != nil {
@@ -307,9 +306,9 @@ func TestEloReach1200(t *testing.T) {
 		},
 	}
 	lastGame := playerGames[len(playerGames)-1]
-	oldRatings := stores.EloRatings{player.ID: 1190, opponent.ID: 1050}
+	oldRatings := models.EloRatings{player.ID: 1190, opponent.ID: 1050}
 	// Player's new ELO crosses the 1200 threshold
-	newRating := stores.EloRatings{player.ID: 1206, opponent.ID: 1034}
+	newRating := models.EloRatings{player.ID: 1206, opponent.ID: 1034}
 
 	achievements, err := calculatePlayersAchievements(player.ID, playerGames, gameToGameResult(lastGame), oldRatings, newRating)
 	if err != nil {

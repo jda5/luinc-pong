@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jda5/luinc-pong/src/internal/models"
-	"github.com/jda5/luinc-pong/src/internal/stores"
 )
 
 // -------------------------------------------------------------------------------- constants & types
@@ -74,10 +73,10 @@ func (a AchievementSet) InsertID(id models.AchievementID) {
 
 // Calculate and update the achievements for both players based on their game history and recent game result.
 func UpdatePlayerAchievements(
-	s stores.Store,
+	s models.Store,
 	lastGame models.GameResult,
-	oldRatings stores.EloRatings,
-	newRatings stores.EloRatings,
+	oldRatings models.EloRatings,
+	newRatings models.EloRatings,
 ) error {
 
 	for _, id := range []int{lastGame.WinnerID, lastGame.LoserID} {
@@ -111,8 +110,8 @@ func calculatePlayersAchievements(
 	id int,
 	playerGames []models.Game,
 	lastGame models.GameResult,
-	oldRatings stores.EloRatings,
-	newRating stores.EloRatings,
+	oldRatings models.EloRatings,
+	newRating models.EloRatings,
 ) ([]models.AchievementID, error) {
 
 	a := make(AchievementSet)
@@ -312,8 +311,8 @@ func addPlayerEloAchievement(
 	achievements *[]models.AchievementID,
 	id int,
 	lastGame models.GameResult,
-	oldRatings stores.EloRatings,
-	newRating stores.EloRatings,
+	oldRatings models.EloRatings,
+	newRating models.EloRatings,
 ) error {
 	if id == lastGame.WinnerID {
 		opponentElo, ok := oldRatings[lastGame.LoserID]
