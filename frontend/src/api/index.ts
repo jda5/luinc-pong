@@ -1,4 +1,4 @@
-import { PlayerProfile, GameResult, PlayerCreate, Achievement, IndexPageData } from '../types';
+import { PlayerProfile, GameResult, PlayerCreate, Achievement, IndexPageData, HeadToHead } from '../types';
 
 // const API_BASE_URL = 'https://api.luincpong.com';
 const API_BASE_URL = 'http://localhost:8080';
@@ -58,4 +58,8 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  // GET /head-to-head?p1=:p1&p2=:p2
+  getHeadToHead: (p1: number, p2: number): Promise<HeadToHead> =>
+    fetchApi<HeadToHead>(`/head-to-head?p1=${p1}&p2=${p2}`),
 };

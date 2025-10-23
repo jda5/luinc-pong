@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jda5/luinc-pong/src/internal/exceptions"
 	"github.com/jda5/luinc-pong/src/internal/models"
 	"github.com/jda5/luinc-pong/src/internal/utils"
 )
@@ -90,6 +92,10 @@ func (h *APIHandler) GetHeadToHead(c *gin.Context) {
 
 	headToHead, err := h.Store.GetHeadToHead(p1, p2)
 	if err != nil {
+		if errors.Is(err, exceptions.ErrNoGamesPlayed) {
+			c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			return
+		}
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}

@@ -56,3 +56,29 @@ export interface GameResult {
 export interface PlayerCreate {
   name: string;
 }
+
+// Head-to-Head types
+export interface HeadToHeadPlayerStats {
+  id: number;
+  name: string;
+  gamesWon: number;
+  winProbability: number;
+  longestWinStreak: number;
+  totalPoints: number;
+  avgPointsPerGame: number;
+}
+
+export interface ScoreStats {
+  avgScoreDifferential: number;
+  biggestBlowout: GameResult;
+  mostCompetitive: GameResult;
+}
+
+export interface HeadToHead {
+  player1: HeadToHeadPlayerStats;
+  player2: HeadToHeadPlayerStats;
+  firstPlayedAt: string;
+  totalGameCount: number;
+  recentGames: Game[];
+  scoreStats: ScoreStats;
+}

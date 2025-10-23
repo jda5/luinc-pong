@@ -8,6 +8,7 @@ import (
 	_ "time/tzdata"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/jda5/luinc-pong/src/internal/exceptions"
 	"github.com/jda5/luinc-pong/src/internal/models"
 	"github.com/jda5/luinc-pong/src/internal/utils"
 )
@@ -327,6 +328,10 @@ func (s *MySQLStore) GetHeadToHead(p1 int, p2 int) (models.HeadToHead, error) {
 	// Check for errors during iteration
 	if err := rows.Err(); err != nil {
 		return h, fmt.Errorf("error iterating games: %v", err)
+	}
+
+	if len(h.RecentGames) == 0 {
+		return h, exceptions.ErrNoGamesPlayed
 	}
 
 	// Calculate averages if we have recorded games

@@ -6,6 +6,7 @@ import { api } from './api';
 import type { GameResult, PlayerCreate } from './types';
 import AuthWrapper from './components/AuthWrapper';
 import AchievementsPage from './components/AchievementsPage';
+import HeadToHeadPage from './components/HeadToHeadPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -366,17 +367,22 @@ const HomePage: React.FC = () => {
             <h1 className="athletic-display text-4xl">🏓 LUinc. Pong</h1>
             <div className="flex gap-3">
               <Link
+                to="/head-to-head"
+                className="athletic-btn athletic-btn-secondary flex items-center gap-2"
+              >
+                ⚔️ Head-to-Head
+              </Link>
+              <Link
                 to="/achievements"
                 className="athletic-btn athletic-btn-secondary flex items-center gap-2"
               >
-                <Trophy size={16} />
-                Achievements
+                🏆 Achievements
               </Link>
               <button
                 onClick={() => setShowAddPlayer(true)}
                 className="athletic-btn athletic-btn-secondary"
               >
-                Add Player
+                🏓 Add Player
               </button>
               <button
                 onClick={() => setShowAddGame(true)}
@@ -654,6 +660,7 @@ const App: React.FC = () => {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/player/:id" element={<PlayerPage />} />
                 <Route path="/achievements" element={<AchievementsPage />} />
+                <Route path="/head-to-head" element={<HeadToHeadPage />} />
               </Routes>
             </main>
           </div>

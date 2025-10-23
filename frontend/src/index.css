@@ -423,6 +423,105 @@ body {
   line-height: 1.4;
 }
 
+/* Head-to-Head Specific Styles */
+.head-to-head-vs {
+  position: relative;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.head-to-head-vs::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--grey-200);
+  z-index: 1;
+}
+
+.head-to-head-vs-text {
+  background: var(--pure-white);
+  padding: 0 2rem;
+  position: relative;
+  z-index: 2;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--lime-green);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Enhanced Player Stats Cards */
+.player-stats-card {
+  background: var(--pure-white);
+  border: 2px solid var(--grey-100);
+  border-radius: 16px;
+  padding: 32px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.player-stats-card:hover {
+  border-color: var(--lime-green);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(132, 204, 22, 0.15);
+}
+
+.player-stats-card.winner {
+  border-color: var(--lime-green);
+  background: linear-gradient(135deg, rgba(132, 204, 22, 0.05) 0%, rgba(132, 204, 22, 0.02) 100%);
+}
+
+.player-stats-card.winner::before {
+  content: '🏆';
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+/* Score Stats Enhancement */
+.score-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.score-stat-item {
+  background: var(--pure-white);
+  border: 1px solid var(--grey-200);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.score-stat-item:hover {
+  border-color: var(--lime-green);
+  box-shadow: 0 4px 12px rgba(132, 204, 22, 0.1);
+}
+
+.score-stat-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--pure-black);
+  margin-bottom: 8px;
+  font-stretch: condensed;
+}
+
+.score-stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--grey-300);
+}
+
 /* Utility Classes */
 .text-lime { color: var(--lime-green); }
 .bg-lime { background-color: var(--lime-green); }
