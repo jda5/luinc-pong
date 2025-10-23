@@ -359,7 +359,7 @@ const HeadToHeadPage: React.FC = () => {
               <div className="athletic-container text-center">
                 <h2 className="athletic-heading text-2xl mb-4">No Games Played 😢</h2>
                 <p className="athletic-body text-grey-300 mb-6">
-                  Get ping ponging!
+                  Get ponging!
                 </p>
                 <button
                   onClick={() => window.location.reload()}

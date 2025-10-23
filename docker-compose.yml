@@ -4,11 +4,11 @@ services:
   backend:
 
     # --- COMMENT OUT IN PRODUCTION ---
-    build:
-      dockerfile: ./backend/Dockerfile
+    # build:
+    #   dockerfile: ./backend/Dockerfile
 
-    # platform: linux/amd64
-    # image: ghcr.io/jda5/luinc-pong:latest
+    platform: linux/amd64
+    image: ghcr.io/jda5/luinc-pong:latest
 
     container_name: backend
     restart: always
@@ -23,8 +23,8 @@ services:
       - "host.docker.internal:host-gateway"
 
     # --- COMMENT OUT IN PRODUCTION ---
-    ports:
-      - "8080:8080"
+    # ports:
+    #   - "8080:8080"
 
     labels:
       # === Traefik Configurations / TLS ===
@@ -56,42 +56,42 @@ services:
       - traefik-public
       - internal-network
 
-  frontend:
-    build:
-      dockerfile: ./frontend/Dockerfile
+  # frontend:
+  #   build:
+  #     dockerfile: ./frontend/Dockerfile
     
-    container_name: frontend
-    ports:
-      - "5173:5173"
+  #   container_name: frontend
+  #   ports:
+  #     - "5173:5173"
 
-    labels:
-      # === Traefik Configurations / TLS ===
-      - traefik.enable=true
-      # Service name "app" is fine, as it's unique to the frontend now.
-      - traefik.http.services.app.loadbalancer.server.port=5173
+  #   labels:
+  #     # === Traefik Configurations / TLS ===
+  #     - traefik.enable=true
+  #     # Service name "app" is fine, as it's unique to the frontend now.
+  #     - traefik.http.services.app.loadbalancer.server.port=5173
       
-      # --- HTTP Router ---
-      # Router name "app-http" is fine.
-      - traefik.http.routers.app-http.entrypoints=http
-      - traefik.http.routers.app-http.rule=Host(`${DOMAIN}`)
-      - traefik.http.routers.app-http.middlewares=https-redirect
+  #     # --- HTTP Router ---
+  #     # Router name "app-http" is fine.
+  #     - traefik.http.routers.app-http.entrypoints=http
+  #     - traefik.http.routers.app-http.rule=Host(`${DOMAIN}`)
+  #     - traefik.http.routers.app-http.middlewares=https-redirect
 
-      # --- HTTPS Router ---
-      # Router name "app-https" is fine.
-      - traefik.http.routers.app-https.entrypoints=https
-      - traefik.http.routers.app-https.rule=Host(`${DOMAIN}`)
-      - traefik.http.routers.app-https.tls=true
-      - traefik.http.routers.app-https.tls.certresolver=le
+  #     # --- HTTPS Router ---
+  #     # Router name "app-https" is fine.
+  #     - traefik.http.routers.app-https.entrypoints=https
+  #     - traefik.http.routers.app-https.rule=Host(`${DOMAIN}`)
+  #     - traefik.http.routers.app-https.tls=true
+  #     - traefik.http.routers.app-https.tls.certresolver=le
 
-      # --- Middlewares ---
-      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
-      - traefik.docker.network=traefik-public
+  #     # --- Middlewares ---
+  #     - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+  #     - traefik.docker.network=traefik-public
 
-    networks:
-      # Use the public network created to be shared between Traefik and
-      # any other service that needs to be publically available with HTTPS
-      - traefik-public
-      - internal-network
+  #   networks:
+  #     # Use the public network created to be shared between Traefik and
+  #     # any other service that needs to be publically available with HTTPS
+  #     - traefik-public
+  #     - internal-network
 
 networks:
   traefik-public:

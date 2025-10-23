@@ -19,10 +19,9 @@ type APIHandler struct {
 
 // ---------------------------------------- internal helpers
 
-func parsePlayerID(c *gin.Context, paramName string) (int, error) {
-	idString := c.Query(paramName)
+func parsePlayerID(idString string) (int, error) {
 	if idString == "" {
-		return 0, fmt.Errorf("missing required parameter: %s", paramName)
+		return 0, fmt.Errorf("missing required parameter")
 	}
 
 	id, err := strconv.Atoi(idString)
@@ -58,7 +57,7 @@ func (h *APIHandler) GetIndexPage(c *gin.Context) {
 }
 
 func (h *APIHandler) GetPlayerProfile(c *gin.Context) {
-	id, err := parsePlayerID(c, "id")
+	id, err := parsePlayerID(c.Param("id"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -73,13 +72,13 @@ func (h *APIHandler) GetPlayerProfile(c *gin.Context) {
 }
 
 func (h *APIHandler) GetHeadToHead(c *gin.Context) {
-	p1, err := parsePlayerID(c, "p1")
+	p1, err := parsePlayerID(c.Query("p1"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	p2, err := parsePlayerID(c, "p2")
+	p2, err := parsePlayerID(c.Query("p2"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
