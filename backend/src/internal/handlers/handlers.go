@@ -19,7 +19,7 @@ type APIHandler struct {
 
 // ---------------------------------------- internal helpers
 
-func parsePlayerID(idString string) (int, error) {
+func parseID(idString string) (int, error) {
 	if idString == "" {
 		return 0, fmt.Errorf("missing required parameter")
 	}
@@ -37,6 +37,28 @@ func parsePlayerID(idString string) (int, error) {
 }
 
 // ---------------------------------------- public API
+
+func (h *APIHandler) DeleteGame(c *gin.Context) {
+	gameId, err := parseID(c.Param("id"))
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	err = h.Store.DeleteGame(gameId)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	err = utils.RecalculateEloRatings(h.Store)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, gin.H{"message": "game deleted successfully"})
+}
 
 func (h *APIHandler) GetAchievements(c *gin.Context) {
 	achievements, err := h.Store.GetAchievements()
@@ -64,7 +86,7 @@ func (h *APIHandler) GetIndexPage(c *gin.Context) {
 }
 
 func (h *APIHandler) GetPlayerProfile(c *gin.Context) {
-	id, err := parsePlayerID(c.Param("id"))
+	id, err := parseID(c.Param("id"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -79,13 +101,13 @@ func (h *APIHandler) GetPlayerProfile(c *gin.Context) {
 }
 
 func (h *APIHandler) GetHeadToHead(c *gin.Context) {
-	p1, err := parsePlayerID(c.Query("p1"))
+	p1, err := parseID(c.Query("p1"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	p2, err := parsePlayerID(c.Query("p2"))
+	p2, err := parseID(c.Query("p2"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return

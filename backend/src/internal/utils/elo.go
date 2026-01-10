@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math"
+	"time"
 
 	"github.com/jda5/luinc-pong/src/internal/models"
 )
@@ -18,6 +19,49 @@ func CalculateExpectedScore(playerRating float64, opponentRating float64) float6
 func CalculateNewRating(playerRating float64, opponentRating float64, score int, k int) float64 {
 	expectedScore := CalculateExpectedScore(playerRating, opponentRating)
 	return playerRating + float64(k)*(float64(score)-expectedScore)
+}
+
+func RecalculateEloRatings(s models.Store) error {
+
+	games, err := s.GetGameResults()
+	if err != nil {
+		return err
+	}
+
+	ratingMap := make(map[int]float64)
+	lastPlayedMap := make(map[int]time.Time)
+
+	for _, game := range games {
+		// Get current ratings (default to 1000 if new player)
+		winnerRating, ok := ratingMap[game.WinnerID]
+		if !ok {
+			winnerRating = 1000
+		}
+		loserRating, ok := ratingMap[game.LoserID]
+		if !ok {
+			loserRating = 1000
+		}
+
+		// Calculate and store new ratings
+		ratingMap[game.WinnerID] = CalculateNewRating(winnerRating, loserRating, 1, 40)
+		ratingMap[game.LoserID] = CalculateNewRating(loserRating, winnerRating, 0, 40)
+
+		// Track last played time
+		lastPlayedMap[game.WinnerID] = game.CreatedAt
+		lastPlayedMap[game.LoserID] = game.CreatedAt
+	}
+
+	err = s.UpdateEloRatings(ratingMap)
+	if err != nil {
+		return err
+	}
+
+	err = s.UpdatePlayerUpdatedAt(lastPlayedMap)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Pass interfaces by value. The interface itself is a small value, but it

@@ -31,6 +31,7 @@ func main() {
 	router.GET("/players/:id", h.GetPlayerProfile)
 	router.GET("/head-to-head", h.GetHeadToHead)
 	router.POST("/players", h.InsertPlayer)
+	router.DELETE("/games/:id", h.DeleteGame)
 	router.POST("/games", h.InsertGame)
 
 	router.Run(":8080")

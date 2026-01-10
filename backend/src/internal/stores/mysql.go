@@ -13,7 +13,13 @@ import (
 	"github.com/jda5/luinc-pong/src/internal/utils"
 )
 
-// ---------------------------------------- queries
+// -------------------------------------------------------------------------------- queries
+
+const DELETE_GAME_QUERY string = `
+DELETE FROM games
+WHERE
+	id = ?;
+`
 
 const INSERT_GAME_QUERY string = `
 INSERT INTO games (winner_id, loser_id, winner_score, loser_score)
@@ -89,7 +95,15 @@ ORDER BY g.created_at DESC
 LIMIT ?;
 `
 
-const SELECT_GAMES string = `
+const SELECT_GAME_RESULTS string = `
+SELECT 
+    winner_id, loser_id, created_at
+FROM
+    games
+ORDER BY created_at ASC;
+`
+
+const SELECT_GAME_RESULTS_BY_PLAYERS string = `
 SELECT
 	g.id AS game_id,
     w.id AS winner_id,
@@ -146,13 +160,38 @@ WHERE
     id = ?;
 `
 
-// ---------------------------------------- interface implementation
+const UPDATE_PLAYER_UPDATED_AT_QUERY string = `
+UPDATE players 
+SET 
+    updated_at = ?
+WHERE
+    id = ?;
+`
+
+// -------------------------------------------------------------------------------- store implementation
 
 type MySQLStore struct {
 	DB             *sql.DB
 	TZ             *time.Location
 	TotalGameCount int
 	TotalPointSum  int
+}
+
+// -------------------------------------------------------------------------------- interface implementation
+
+func (s *MySQLStore) DeleteGame(id int) error {
+
+	_, err := s.DB.Exec(DELETE_GAME_QUERY, id)
+	if err != nil {
+		return fmt.Errorf("error deleting game: %v", err)
+	}
+
+	err = SetGameStatistics(s)
+	if err != nil {
+		return fmt.Errorf("error setting game statistics: %v", err)
+	}
+
+	return nil
 }
 
 func (s *MySQLStore) GetAchievements() ([]models.Achievement, error) {
@@ -178,10 +217,42 @@ func (s *MySQLStore) GetAchievements() ([]models.Achievement, error) {
 	return achievements, nil
 }
 
+func (s *MySQLStore) GetGameResults() ([]models.BaseGame, error) {
+	rows, err := s.DB.Query(SELECT_GAME_RESULTS)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching game results: %v", err)
+	}
+
+	defer rows.Close()
+
+	results := make([]models.BaseGame, 0)
+
+	for rows.Next() {
+		var g models.BaseGame
+		err := rows.Scan(
+			&g.WinnerID,
+			&g.LoserID,
+			&g.CreatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning game: %v", err)
+		}
+		results = append(results, g)
+	}
+
+	// Check for errors during iteration
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating games: %v", err)
+	}
+
+	return results, nil
+
+}
+
 func (s *MySQLStore) GetHeadToHead(p1 int, p2 int) (models.HeadToHead, error) {
 	h := models.HeadToHead{}
 
-	rows, err := s.DB.Query(SELECT_GAMES, p1, p2, p2, p1)
+	rows, err := s.DB.Query(SELECT_GAME_RESULTS_BY_PLAYERS, p1, p2, p2, p1)
 	if err != nil {
 		return h, fmt.Errorf("error fetching head-to-head stats: %v", err)
 	}
@@ -591,7 +662,51 @@ func (s *MySQLStore) UpdateEloRatings(players models.EloRatings) error {
 	return nil
 }
 
-// ---------------------------------------- initialiser
+func (s *MySQLStore) UpdatePlayerUpdatedAt(m map[int]time.Time) error {
+	tx, err := s.DB.Begin()
+	if err != nil {
+		return fmt.Errorf("error updating Players updated_at value: %v", err)
+	}
+
+	// Defer a rollback in case anything fails.
+	defer tx.Rollback()
+
+	// Prepare the statement once for repeated use.
+	stmt, err := tx.Prepare(UPDATE_PLAYER_UPDATED_AT_QUERY)
+	if err != nil {
+		return fmt.Errorf("error updating Players updated_at value: %v", err)
+	}
+
+	for id, updatedAt := range m {
+		_, err := stmt.Exec(updatedAt, id)
+		if err != nil {
+			return fmt.Errorf("error updating Player %v updated_at value: %v", id, err)
+		}
+	}
+
+	// Commit the transaction.
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("error updating Players updated_at value: %v", err)
+	}
+
+	return nil
+}
+
+// -------------------------------------------------------------------------------- initialiser
+
+func SetGameStatistics(s *MySQLStore) error {
+	// fetch cached global games statistics
+	var totalGameCount int
+	var totalPointSum int
+	row := s.DB.QueryRow(SELECT_TOTAL_GAMES_STATS)
+	if err := row.Scan(&totalGameCount, &totalPointSum); err != nil {
+		return fmt.Errorf("error fetching global games statistics: %v", err)
+	}
+
+	s.TotalGameCount = totalGameCount
+	s.TotalPointSum = totalPointSum
+	return nil
+}
 
 func CreateMySQLDAO() *MySQLStore {
 	cfg := mysql.NewConfig()
@@ -619,13 +734,12 @@ func CreateMySQLDAO() *MySQLStore {
 		panic(fmt.Sprintf("error fetching timezone: %v", err))
 	}
 
-	// fetch cached global games statistics
-	var totalGameCount int
-	var totalPointSum int
-	row := db.QueryRow(SELECT_TOTAL_GAMES_STATS)
-	if err := row.Scan(&totalGameCount, &totalPointSum); err != nil {
-		panic(fmt.Sprintf("error fetching global games statistics: %v", err))
+	s := &MySQLStore{DB: db, TZ: tz, TotalGameCount: 0, TotalPointSum: 0}
+
+	err = SetGameStatistics(s)
+	if err != nil {
+		panic(fmt.Sprintf("error setting initial game statistics: %v", err))
 	}
 
-	return &MySQLStore{DB: db, TZ: tz, TotalGameCount: totalGameCount, TotalPointSum: totalPointSum}
+	return s
 }

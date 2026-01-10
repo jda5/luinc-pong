@@ -58,6 +58,12 @@ type PlayerProfile struct {
 
 // ---------------------------------------- games
 
+type BaseGame struct {
+	WinnerID  int
+	LoserID   int
+	CreatedAt time.Time
+}
+
 // Pointer values encode as the value pointed to. A nil pointer encodes as the null JSON object.
 // Store a pointer to an int which will be encoded as an int if not nil and will be encoded as "null" if nil.
 
