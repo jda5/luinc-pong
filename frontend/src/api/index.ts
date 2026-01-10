@@ -1,7 +1,7 @@
 import { PlayerProfile, GameResult, PlayerCreate, Achievement, IndexPageData, HeadToHead } from '../types';
 
-const API_BASE_URL = 'https://api.luincpong.com';
-// const API_BASE_URL = 'http://localhost:8080';
+// const API_BASE_URL = 'https://api.luincpong.com';
+const API_BASE_URL = 'http://localhost:8080';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -34,8 +34,8 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
 
 export const api = {
   // GET / - Index page data with leaderboard and global stats
-  getIndexPageData: (): Promise<IndexPageData> =>
-    fetchApi<IndexPageData>('/'),
+  getIndexPageData: (includeInactive: boolean = false): Promise<IndexPageData> =>
+    fetchApi<IndexPageData>(`/?includeInactive=${includeInactive}`),
 
   // GET /achievements
   getAchievements: (): Promise<Achievement[]> =>

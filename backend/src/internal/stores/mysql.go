@@ -124,6 +124,8 @@ SELECT
     id, name, elo_rating
 FROM
     players
+WHERE
+	updated_at >= ?
 ORDER BY elo_rating DESC;
 `
 
@@ -353,10 +355,17 @@ func (s *MySQLStore) GetHeadToHead(p1 int, p2 int) (models.HeadToHead, error) {
 	return h, nil
 }
 
-func (s *MySQLStore) GetIndexPageData() (models.IndexPageData, error) {
+func (s *MySQLStore) GetIndexPageData(includeInactive bool) (models.IndexPageData, error) {
 	leaderboard := make([]models.LeaderboardRow, 0)
 
-	rows, err := s.DB.Query(SELECT_LEADERBOARD_QUERY)
+	var cutoff time.Time
+	if includeInactive {
+		cutoff = time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	} else {
+		cutoff = time.Now().AddDate(0, -2, 0)
+	}
+
+	rows, err := s.DB.Query(SELECT_LEADERBOARD_QUERY, cutoff)
 	if err != nil {
 		return models.IndexPageData{}, fmt.Errorf("error fetching leaderboard: %v", err)
 	}

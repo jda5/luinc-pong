@@ -143,10 +143,15 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ onClose }) => {
   const [loserScore, setLoserScore] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: indexData } = useQuery({
-    queryKey: ['indexPageData'],
-    queryFn: api.getIndexPageData,
-  });
+  // const { data: indexData } = useQuery({
+  //   queryKey: ['indexPageData'],
+  //   queryFn: () => api.getIndexPageData(),
+  // });
+
+  const { data: indexData} = useQuery({
+      queryKey: ['indexPageData', true],
+      queryFn: () => api.getIndexPageData(true),
+    });
 
   const addGameMutation = useMutation<void, Error, GameResult>({
     mutationFn: (data: GameResult) => api.addGame(data),
@@ -304,10 +309,11 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ onClose }) => {
 const HomePage: React.FC = () => {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [showAddGame, setShowAddGame] = useState(false);
+  const [showFull, setShowFull] = useState(false);
 
   const { data: indexData, isLoading, error } = useQuery({
-    queryKey: ['indexPageData'],
-    queryFn: api.getIndexPageData,
+    queryKey: ['indexPageData', showFull],
+    queryFn: () => api.getIndexPageData(showFull),
   });
 
   if (isLoading) {
@@ -412,9 +418,31 @@ const HomePage: React.FC = () => {
         )}
 
         <div className="athletic-container">
-          <div className="mb-8">
-            <h2 className="athletic-heading text-2xl mb-2">Leaderboard</h2>
-            <p className="athletic-label">Current Rankings</p>
+          <div className="mb-8 flex items-start justify-between">
+            <div>
+              <h2 className="athletic-heading text-2xl mb-2">Leaderboard</h2>
+              <p className="athletic-label">Current Rankings</p>
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <span className="athletic-label" style={{ color: showFull ? 'var(--lime-green)' : 'var(--grey-300)' }}>
+                Show Full
+              </span>
+              <div 
+                className="relative"
+                onClick={() => setShowFull(!showFull)}
+              >
+                <div 
+                  className={`w-12 h-6 rounded-full transition-colors duration-200 ${
+                    showFull ? 'bg-lime' : 'bg-grey-200'
+                  }`}
+                />
+                <div 
+                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 ${
+                    showFull ? 'translate-x-6' : 'translate-x-0.5'
+                  }`}
+                />
+              </div>
+            </label>
           </div>
 
           {/* Leaderboard Grid */}

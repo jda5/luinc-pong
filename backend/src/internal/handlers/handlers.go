@@ -48,7 +48,14 @@ func (h *APIHandler) GetAchievements(c *gin.Context) {
 }
 
 func (h *APIHandler) GetIndexPage(c *gin.Context) {
-	data, err := h.Store.GetIndexPageData()
+
+	includeInactiveParam := c.DefaultQuery("includeInactive", "false")
+	includeInactive, err := strconv.ParseBool(includeInactiveParam)
+	if err != nil {
+		c.IndentedJSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
+	}
+
+	data, err := h.Store.GetIndexPageData(includeInactive)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return

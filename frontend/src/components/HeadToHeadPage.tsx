@@ -279,10 +279,10 @@ const HeadToHeadPage: React.FC = () => {
   const [selectedPlayer1, setSelectedPlayer1] = useState<number | null>(null);
   const [selectedPlayer2, setSelectedPlayer2] = useState<number | null>(null);
 
-  // Get players list for selection
+  // Get players list for selection (include all players for head-to-head comparison)
   const { data: indexData, isLoading: playersLoading, error: playersError } = useQuery({
-    queryKey: ['indexPageData'],
-    queryFn: api.getIndexPageData,
+    queryKey: ['indexPageData', true],
+    queryFn: () => api.getIndexPageData(true),
   });
 
   // Get head-to-head data when both players are selected
