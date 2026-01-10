@@ -1,7 +1,7 @@
 import { PlayerProfile, GameResult, PlayerCreate, Achievement, IndexPageData, HeadToHead } from '../types';
 
-// const API_BASE_URL = 'https://api.luincpong.com';
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://api.luincpong.com';
+// const API_BASE_URL = 'http://localhost:8080';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {

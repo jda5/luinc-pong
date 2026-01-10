@@ -1,8 +1,8 @@
 # ------------------------------------------ stop services
 docker compose down
 
-docker rmi luinc-pong-backend --force
-docker rmi luinc-pong-frontend --force
+docker rmi app-frontend:latest --force
+docker rmi ghcr.io/jda5/luinc-pong:latest --force
 
 # ------------------------------------------ create networks
 docker network create traefik-public

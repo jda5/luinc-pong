@@ -1,0 +1,1 @@
+rsync -av ./* root@luincpong.com:/root/app 
