@@ -2,36 +2,6 @@
 
 An Elo leaderboard for our office table tennis games.
 
-## Development
-
-### Prerequisites
-
-- Docker and Docker Compose
-- Node.js (for frontend development)
-- Go (for backend development)
-
-### Running Locally
-
-1. Ensure the `build` section is uncommented in `docker-compose.yml`:
-   ```yaml
-   build:
-     dockerfile: ./backend/Dockerfile
-   ```
-
-2. Comment out the `image` line:
-   ```yaml
-   # image: ghcr.io/jda5/luinc-pong:latest
-   ```
-
-3. Start the backend:
-   ```bash
-   docker compose up -d backend
-   ```
-
-4. The API will be available at `http://localhost:8080`
-
----
-
 ## Deployment
 
 ### 1. Authenticate with GitHub Container Registry

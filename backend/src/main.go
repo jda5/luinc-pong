@@ -17,7 +17,7 @@ func main() {
 		cors.New(
 			cors.Config{
 				AllowOrigins:     []string{"*"},
-				AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+				AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
 				AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 				AllowCredentials: true,
 				MaxAge:           12 * time.Hour,
@@ -31,6 +31,7 @@ func main() {
 	router.GET("/players/:id", h.GetPlayerProfile)
 	router.GET("/head-to-head", h.GetHeadToHead)
 	router.POST("/players", h.InsertPlayer)
+	router.GET("/games", h.GetGames)
 	router.DELETE("/games/:id", h.DeleteGame)
 	router.POST("/games", h.InsertGame)
 

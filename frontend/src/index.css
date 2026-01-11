@@ -562,3 +562,194 @@ body {
     padding: 12px 16px;
   }
 }
+
+/* Admin Page Styles */
+.admin-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.admin-game-card {
+  background: var(--pure-white);
+  border: 2px solid var(--grey-100);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.admin-game-card:hover {
+  border-color: var(--grey-200);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.admin-game-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.admin-game-players {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.admin-game-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-game-player.winner .admin-game-player-name {
+  font-weight: 700;
+  color: var(--pure-black);
+}
+
+.admin-game-player.loser .admin-game-player-name {
+  font-weight: 500;
+  color: var(--grey-400);
+}
+
+.admin-game-player-name {
+  font-size: 0.9375rem;
+}
+
+.admin-game-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--lime-green);
+  color: var(--pure-white);
+}
+
+.admin-game-badge.loser {
+  background: var(--grey-200);
+  color: var(--grey-900);
+}
+
+.admin-game-vs {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--grey-300);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--grey-200);
+  border-radius: 8px;
+  background: var(--pure-white);
+  color: var(--grey-400);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-delete-btn:hover {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.admin-game-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--grey-100);
+}
+
+.admin-game-score,
+.admin-game-date {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-game-score-value {
+  font-family: 'Inter', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--pure-black);
+}
+
+.admin-game-date-value {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--grey-400);
+}
+
+/* Admin Game Card Preview (in modal) */
+.admin-game-card-preview {
+  background: var(--grey-50);
+  border: 2px solid var(--grey-200);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* Danger Button Style */
+.athletic-btn-danger {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: var(--pure-white);
+}
+
+.athletic-btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.athletic-btn-danger:disabled {
+  background: #fca5a5;
+  border-color: #fca5a5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Shake Animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Lime Green Text Utility */
+.text-lime-green {
+  color: var(--lime-green);
+}
+
+/* Admin Page Responsive */
+@media (max-width: 768px) {
+  .admin-games-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-game-players {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .admin-game-vs {
+    display: none;
+  }
+}

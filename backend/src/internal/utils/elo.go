@@ -23,13 +23,25 @@ func CalculateNewRating(playerRating float64, opponentRating float64, score int,
 
 func RecalculateEloRatings(s models.Store) error {
 
-	games, err := s.GetGameResults()
+	// initialize all player ratings to 1000
+	players, err := s.GetPlayerBasicInfo()
 	if err != nil {
 		return err
 	}
 
 	ratingMap := make(map[int]float64)
 	lastPlayedMap := make(map[int]time.Time)
+
+	for _, player := range players {
+		ratingMap[player.ID] = 1000
+		lastPlayedMap[player.ID] = player.CreatedAt
+	}
+
+	// fetch all games in chronological order
+	games, err := s.GetGameResults()
+	if err != nil {
+		return err
+	}
 
 	for _, game := range games {
 		// Get current ratings (default to 1000 if new player)

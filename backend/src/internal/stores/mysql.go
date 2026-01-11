@@ -125,10 +125,30 @@ WHERE
 ORDER BY g.created_at DESC;
 `
 
+const SELECT_GAMES_PAGINATED_QUERY string = `
+SELECT
+	g.id AS game_id,
+	w.id AS winner_id,
+	w.name AS winner_name,
+	l.id AS loser_id,
+	l.name AS loser_name,
+	g.winner_score,
+	g.loser_score,
+	g.created_at
+FROM
+	games g
+		LEFT JOIN
+	players w ON g.winner_id = w.id
+		LEFT JOIN
+	players l ON g.loser_id = l.id
+ORDER BY g.created_at DESC
+LIMIT ? OFFSET ?;
+`
+
 const SELECT_TOTAL_GAMES_STATS string = `
 SELECT 
     COUNT(*) AS total_game_count,
-    SUM(winner_score) + SUM(loser_score) AS total_point_sum
+    COALESCE(SUM(winner_score) + SUM(loser_score), 0) AS total_point_sum
 FROM
     games;
 `
@@ -166,6 +186,13 @@ SET
     updated_at = ?
 WHERE
     id = ?;
+`
+
+const SELECT_PLAYERS_BASIC_INFO_QUERY string = `
+SELECT
+	id, name, created_at
+FROM
+	players;
 `
 
 // -------------------------------------------------------------------------------- store implementation
@@ -215,6 +242,35 @@ func (s *MySQLStore) GetAchievements() ([]models.Achievement, error) {
 	}
 
 	return achievements, nil
+}
+
+func (s *MySQLStore) GetGames(page int) ([]models.Game, error) {
+	games := make([]models.Game, 0)
+	offset := (page - 1) * 50
+
+	rows, err := s.DB.Query(SELECT_GAMES_PAGINATED_QUERY, 50, offset)
+
+	if err != nil {
+		return games, fmt.Errorf("error fetching games: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var g models.Game
+		var winner models.Player
+		var loser models.Player
+		if err := rows.Scan(&g.ID, &winner.ID, &winner.Name, &loser.ID, &loser.Name, &g.WinnerScore, &g.LoserScore, &g.CreatedAt); err != nil {
+			return games, fmt.Errorf("error fetching games: %v", err)
+		}
+		g.Winner = winner
+		g.Loser = loser
+		g.CreatedAt = g.CreatedAt.In(s.TZ)
+		games = append(games, g)
+	}
+	if err := rows.Err(); err != nil {
+		return games, fmt.Errorf("error fetching games: %v", err)
+	}
+	return games, nil
 }
 
 func (s *MySQLStore) GetGameResults() ([]models.BaseGame, error) {
@@ -461,6 +517,29 @@ func (s *MySQLStore) GetIndexPageData(includeInactive bool) (models.IndexPageDat
 	}, nil
 }
 
+func (s *MySQLStore) GetPlayerBasicInfo() ([]models.PlayerBasicInfo, error) {
+	players := make([]models.PlayerBasicInfo, 0)
+
+	rows, err := s.DB.Query(SELECT_PLAYERS_BASIC_INFO_QUERY)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching player basic info: %v", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var p models.PlayerBasicInfo
+		if err := rows.Scan(&p.ID, &p.Name, &p.CreatedAt); err != nil {
+			return nil, fmt.Errorf("error fetching player basic info: %v", err)
+		}
+		players = append(players, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error fetching player basic info: %v", err)
+	}
+	return players, nil
+}
+
 func (s *MySQLStore) GetPlayerEloRatings(ids [2]int) (models.EloRatings, error) {
 
 	// need to use the make() function when creating a map
@@ -468,7 +547,7 @@ func (s *MySQLStore) GetPlayerEloRatings(ids [2]int) (models.EloRatings, error) 
 
 	rows, err := s.DB.Query(SELECT_PLAYER_ELO_RATINGS, ids[0], ids[1])
 	if err != nil {
-		return nil, fmt.Errorf("error geting player elo ratings: %v", err)
+		return nil, fmt.Errorf("error getting player elo ratings: %v", err)
 	}
 	defer rows.Close()
 

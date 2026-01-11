@@ -45,6 +45,12 @@ type Player struct {
 	Name string `json:"name"`
 }
 
+type PlayerBasicInfo struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
 type PlayerProfile struct {
 	ID           int           `json:"id"`
 	Name         string        `json:"name"`

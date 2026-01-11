@@ -7,6 +7,7 @@ import type { GameResult, PlayerCreate } from './types';
 import AuthWrapper from './components/AuthWrapper';
 import AchievementsPage from './components/AchievementsPage';
 import HeadToHeadPage from './components/HeadToHeadPage';
+import AdminPage from './components/AdminPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -689,6 +690,7 @@ const App: React.FC = () => {
                 <Route path="/player/:id" element={<PlayerPage />} />
                 <Route path="/achievements" element={<AchievementsPage />} />
                 <Route path="/head-to-head" element={<HeadToHeadPage />} />
+                <Route path="/admin" element={<AdminPage />} />
               </Routes>
             </main>
           </div>
