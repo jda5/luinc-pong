@@ -11,7 +11,7 @@ import (
 
 // -------------------------------------------------------------------------------- constants & types
 
-const LIMIT int = 100_000
+const LIMIT int = 1_000_000
 
 const (
 	PLAY_1   models.AchievementID = iota + 1 // warming up
@@ -49,7 +49,21 @@ const (
 	WIN_UPSET_100_ELO // hostile takeover
 	ELO_REACH_1100    // rising star
 	ELO_REACH_1200    // big shot
-	ELO_REACH_1300    // final boss
+	ELO_REACH_1300    // title charge
+	ELO_REACH_1400    // final boss
+	ELO_REACH_1500    // roll credits
+
+	PLAY_420 // enhance your calm
+
+	WIN_1     // on the scoreboard
+	WIN_10    // not a fluke
+	WIN_25    // victory lap
+	WIN_50    // certified menace
+	WIN_100   // fear me
+	WIN_200   // apex predator
+	WIN_400   // collecting souls
+	PLAY_750  // titan
+	PLAY_1000 // one comma club
 )
 
 type DayCount struct {
@@ -133,8 +147,17 @@ func calculatePlayersAchievements(
 	if gamesPlayed >= 250 {
 		a.InsertID(PLAY_250)
 	}
+	if gamesPlayed >= 420 {
+		a.InsertID(PLAY_420)
+	}
 	if gamesPlayed >= 500 {
 		a.InsertID(PLAY_500)
+	}
+	if gamesPlayed >= 750 {
+		a.InsertID(PLAY_750)
+	}
+	if gamesPlayed >= 1000 {
+		a.InsertID(PLAY_1000)
 	}
 
 	// ---------------------------------------- time-based achievements
@@ -156,6 +179,9 @@ func calculatePlayersAchievements(
 
 	// A counter for number of games played in a single day
 	dayStreak := 0
+
+	// A counter for the total number of games won
+	winCount := 0
 
 	// A map from opponent ID to head-to-head stats
 	headToHeadMap := make(map[int]HeadToHead)
@@ -223,6 +249,30 @@ func calculatePlayersAchievements(
 				a.InsertID(WIN_10_CONSECUTIVE)
 			case 15:
 				a.InsertID(WIN_15_CONSECUTIVE)
+			}
+
+			// ---------------------------------------- winning
+			winCount++
+			if winCount >= 1 {
+				a.InsertID(WIN_1)
+			}
+			if winCount >= 10 {
+				a.InsertID(WIN_10)
+			}
+			if winCount >= 25 {
+				a.InsertID(WIN_25)
+			}
+			if winCount >= 50 {
+				a.InsertID(WIN_50)
+			}
+			if winCount >= 100 {
+				a.InsertID(WIN_100)
+			}
+			if winCount >= 200 {
+				a.InsertID(WIN_200)
+			}
+			if winCount >= 400 {
+				a.InsertID(WIN_400)
 			}
 
 			// ---------------------------------------- losing achievements

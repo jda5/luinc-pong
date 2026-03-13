@@ -30,10 +30,12 @@ func RecalculateEloRatings(s models.Store) error {
 	}
 
 	ratingMap := make(map[int]float64)
+	highestRatingMap := make(map[int]float64)
 	lastPlayedMap := make(map[int]time.Time)
 
 	for _, player := range players {
 		ratingMap[player.ID] = 1000
+		highestRatingMap[player.ID] = 1000
 		lastPlayedMap[player.ID] = player.CreatedAt
 	}
 
@@ -58,12 +60,25 @@ func RecalculateEloRatings(s models.Store) error {
 		ratingMap[game.WinnerID] = CalculateNewRating(winnerRating, loserRating, 1, 40)
 		ratingMap[game.LoserID] = CalculateNewRating(loserRating, winnerRating, 0, 40)
 
+		// Track highest Elo achieved
+		if ratingMap[game.WinnerID] > highestRatingMap[game.WinnerID] {
+			highestRatingMap[game.WinnerID] = ratingMap[game.WinnerID]
+		}
+		if ratingMap[game.LoserID] > highestRatingMap[game.LoserID] {
+			highestRatingMap[game.LoserID] = ratingMap[game.LoserID]
+		}
+
 		// Track last played time
 		lastPlayedMap[game.WinnerID] = game.CreatedAt
 		lastPlayedMap[game.LoserID] = game.CreatedAt
 	}
 
 	err = s.UpdateEloRatings(ratingMap)
+	if err != nil {
+		return err
+	}
+
+	err = s.UpdateHighestEloRatings(highestRatingMap)
 	if err != nil {
 		return err
 	}

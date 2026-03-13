@@ -34,6 +34,7 @@ func main() {
 	router.GET("/games", h.GetGames)
 	router.DELETE("/games/:id", h.DeleteGame)
 	router.POST("/games", h.InsertGame)
+	router.GET("/recalculate", h.RecalculateElo)
 
 	router.Run(":8080")
 }

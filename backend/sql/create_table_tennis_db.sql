@@ -7,7 +7,6 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema table_tennis
 -- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `table_tennis` ;
 
 -- -----------------------------------------------------
 -- Schema table_tennis
@@ -22,6 +21,7 @@ CREATE TABLE IF NOT EXISTS `table_tennis`.`players` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(63) NOT NULL,
   `elo_rating` DOUBLE NOT NULL DEFAULT 1000,
+  `highest_elo` DOUBLE NOT NULL DEFAULT 1000,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -130,7 +130,19 @@ INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (26, 'Hostile Takeover', 'Beat someone 100+ ELO points above you');
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (27, 'Rising Star', 'Reach an ELO of 1100');
 INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (28, 'Big Shot', 'Reach an ELO of 1200');
-INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (29, 'Final Boss', 'Reach an ELO of 1300');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (29, 'Title Charge', 'Reach an ELO of 1300');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (30, 'Final Boss', 'Reach an ELO of 1400');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (31, 'Roll Credits', 'Reach an ELO of 1500');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (32, 'Enhance Your Calm', 'Play 420 games');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (33, 'On The Scoreboard', 'Win your first game');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (34, 'Not a Fluke', 'Win 10 games');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (35, 'Victory Lap', 'Win 25 games');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (36, 'Certified Menace', 'Win 50 games');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (37, 'Fear Me', 'Win 100 games');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (38, 'Apex Predator', 'Win 250 games');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (39, 'Collecting Souls', 'Win 500 games');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (40, 'Titan', 'Play 750 games');
+INSERT INTO `table_tennis`.`achievement` (`id`, `title`, `description`) VALUES (41, 'One Comma Club', 'Play 1,000 games');
 
 COMMIT;
 

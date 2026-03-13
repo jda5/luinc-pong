@@ -66,6 +66,7 @@ SELECT
             loser_id = players.id) AS total_lost,
     name,
     elo_rating,
+	highest_elo,
     created_at
 FROM
     players
@@ -175,7 +176,16 @@ WHERE
 const UPDATE_ELO_RATING_QUERY string = `
 UPDATE players 
 SET 
-    elo_rating = ?
+    elo_rating = ?,
+	highest_elo = GREATEST(highest_elo, ?)
+WHERE
+    id = ?;
+`
+
+const UPDATE_HIGHEST_ELO_RATING_QUERY string = `
+UPDATE players
+SET
+    highest_elo = ?
 WHERE
     id = ?;
 `
@@ -605,7 +615,7 @@ func (s *MySQLStore) GetPlayerProfile(id int) (models.PlayerProfile, error) {
 
 	// ---------------------------------------- basic profile info
 	row := s.DB.QueryRow(SELECT_PLAYER_PROFILE_QUERY, id)
-	if err := row.Scan(&totalWins, &totalLost, &profile.Name, &profile.EloRating, &profile.CreatedAt); err != nil {
+	if err := row.Scan(&totalWins, &totalLost, &profile.Name, &profile.EloRating, &profile.HighestElo, &profile.CreatedAt); err != nil {
 		return profile, fmt.Errorf("error fetching profile: %v", err)
 	}
 	profile.ID = id
@@ -727,7 +737,7 @@ func (s *MySQLStore) UpdateEloRatings(players models.EloRatings) error {
 	}
 
 	for id, eloRating := range players {
-		_, err := stmt.Exec(eloRating, id)
+		_, err := stmt.Exec(eloRating, eloRating, id)
 		if err != nil {
 			return fmt.Errorf("error updating Player %v Elo rating: %v", id, err)
 		}
@@ -736,6 +746,33 @@ func (s *MySQLStore) UpdateEloRatings(players models.EloRatings) error {
 	// Commit the transaction.
 	if err = tx.Commit(); err != nil {
 		return fmt.Errorf("error updating Players Elo rating: %v", err)
+	}
+
+	return nil
+}
+
+func (s *MySQLStore) UpdateHighestEloRatings(players models.EloRatings) error {
+	tx, err := s.DB.Begin()
+	if err != nil {
+		return fmt.Errorf("error updating Players highest Elo rating: %v", err)
+	}
+
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(UPDATE_HIGHEST_ELO_RATING_QUERY)
+	if err != nil {
+		return fmt.Errorf("error updating Players highest Elo rating: %v", err)
+	}
+
+	for id, highestElo := range players {
+		_, err := stmt.Exec(highestElo, id)
+		if err != nil {
+			return fmt.Errorf("error updating Player %v highest Elo rating: %v", id, err)
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("error updating Players highest Elo rating: %v", err)
 	}
 
 	return nil

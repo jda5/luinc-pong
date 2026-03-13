@@ -166,6 +166,15 @@ func (h *APIHandler) InsertPlayer(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"id": id})
 }
 
+func (h *APIHandler) RecalculateElo(c *gin.Context) {
+	err := utils.RecalculateEloRatings(h.Store)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "elo ratings recalculated successfully"})
+}
+
 func (h *APIHandler) InsertGame(c *gin.Context) {
 	var result models.GameResult
 	err := c.BindJSON(&result)

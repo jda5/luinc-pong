@@ -22,5 +22,6 @@ type Store interface {
 	InsertPlayer(name string) (int64, error)
 	InsertPlayerAchievements(id int, achievementIDs []AchievementID) error
 	UpdateEloRatings(players EloRatings) error
+	UpdateHighestEloRatings(players EloRatings) error
 	UpdatePlayerUpdatedAt(m map[int]time.Time) error
 }

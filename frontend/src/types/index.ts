@@ -38,6 +38,7 @@ export interface PlayerProfile {
   id: number;
   name: string;
   eloRating: number;
+  highestElo: number;
   createdAt: string;
   gamesPlayed: number;
   gamesWon: number;

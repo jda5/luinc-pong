@@ -55,6 +55,7 @@ type PlayerProfile struct {
 	ID           int           `json:"id"`
 	Name         string        `json:"name"`
 	EloRating    float64       `json:"eloRating"`
+	HighestElo   float64       `json:"highestElo"`
 	CreatedAt    time.Time     `json:"createdAt"`
 	GamesPlayed  int           `json:"gamesPlayed"`
 	GamesWon     int           `json:"gamesWon"`

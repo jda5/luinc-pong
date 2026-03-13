@@ -389,7 +389,7 @@ const HomePage: React.FC = () => {
                 onClick={() => setShowAddPlayer(true)}
                 className="athletic-btn athletic-btn-secondary"
               >
-                🏓 Add Player
+                👤 Add Player
               </button>
               <button
                 onClick={() => setShowAddGame(true)}
@@ -574,10 +574,14 @@ const PlayerPage: React.FC = () => {
 
         {/* Personal Records Grid */}
                 {/* Personal Records Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           <div className="pr-stat">
             <div className="pr-value">{Math.round(player.eloRating)}</div>
-            <div className="pr-label">ELO RATING</div>
+            <div className="pr-label">CURRENT ELO</div>
+          </div>
+          <div className="pr-stat">
+            <div className="pr-value">{Math.round(player.highestElo)}</div>
+            <div className="pr-label">HIGHEST ELO</div>
           </div>
           <div className="pr-stat">
             <div className="pr-value">{player.gamesPlayed}</div>
