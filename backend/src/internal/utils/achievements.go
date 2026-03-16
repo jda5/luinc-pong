@@ -391,5 +391,11 @@ func addPlayerEloAchievement(
 	if newElo >= 1300 {
 		*achievements = append(*achievements, ELO_REACH_1300)
 	}
+	if newElo >= 1400 {
+		*achievements = append(*achievements, ELO_REACH_1400)
+	}
+	if newElo >= 1500 {
+		*achievements = append(*achievements, ELO_REACH_1500)
+	}
 	return nil
 }
